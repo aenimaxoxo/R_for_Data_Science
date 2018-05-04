@@ -1,0 +1,12 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "January 7, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Nothing worth scripting in chapter 6. The chapter was an overview of file directory systems 

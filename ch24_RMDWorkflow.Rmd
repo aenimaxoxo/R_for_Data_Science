@@ -1,0 +1,12 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "April 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+No code in chapter 24. 

@@ -1,0 +1,194 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "April 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+
+You can set the output of the document:
+
+1. Permanently by modifying the YAML header: 
+
+```
+title: "Viridis Demo"
+output: html_document
+```
+
+2. Transiently, by calling rmarkdown::render() by hand:
+
+```
+rmarkdown::render(
+"diamond-sizes.Rmd",
+output_format = "word_document"
+)
+```
+
+## Output Options
+
+to figure out what parameters you can use, check the documentation. E.g. for html, check ?rmarkdown::html_document()
+
+To override the deault parameter values, you need to use an extended output field. For example, if you wanted to render an html_document with a floating table of contents you'd use: 
+
+```
+output:
+  html_document:
+    toc: true
+    toc_float: true
+```
+
+You can even render multiple outputs by supplying a list of formats: 
+
+```
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+  pdf_document: default
+```
+
+## Documents
+
+pdf_document makes a pdf typeset with latex
+word_document makes a .docx
+odt_document for opendocument text docs .odt
+rtf_document for rich text format .rtf
+md_document for a markdown document
+github_document is a md_document tailored for sharing on github
+
+When generating a document to share with decision makers, you can change global options in the setup chunk
+
+```
+knitr::opts_chunk$set(echo = FALSE)
+
+or 
+
+output:
+  html_document:
+    code_folding: hide
+```
+
+## Notebooks
+
+You can make the ouput include both html/pdf and github documents: 
+
+```
+output:
+  html_notebook: default
+  github_document: default
+```
+
+## Presentations
+
+Presentations work by dividing your content into slides with a new slide beginning at each first # or second ## header. You can also insert a horizontal rule *** to create a new slide without a header
+
+rmarkdown comes with three presentation formats built in:
+
+ioslides_presentation
+  html presentation with ioslides
+  
+slidy_presentation
+  html presentation with W3C slidy
+  
+beamer presentation
+  pdf presentation with latex beamer
+  
+revealjs::revealjs_presentation
+  html presentation with reveal.js. Requires revealjs package
+  
+rmdshower
+  provides a wrapper around the shower presentation engine
+  
+## Dashboards
+
+flexdashboard makes it easy to create dashboards
+
+each level 1 header # begins a new page in the dashboard
+each level 2 header ## begins a new column
+each level 3 header ### begins a new row
+
+for example check dmd_dist_dash.Rmd
+
+
+## Interactivity
+
+Any html format (document, notebook, presentation, or dashboard) can contain interactives.
+
+### HTML widgets
+
+```{r}
+library(leaflet)
+leaflet() %>% 
+  setView(174.764, -36.877, zoom = 16) %>% 
+  addTiles() %>% 
+  addMarkers(174.764, -36.877, popup = "Maungawhau")
+
+```
+
+Packages that have widgets:
+
+* dygraphs - interactive time series visualizations
+* DT - interactive tables
+* rthreejs - interactive 3d plots
+* DiagrammeR - for diagrams (like flowcharts and node-link diagrams)
+* htmlwidgets.org
+
+## Shiny 
+
+to call shiny code from an rmarkdown document:
+
+```
+title: "Shiny Web App"
+output: html_document
+runtime: shiny
+```
+
+ex: 
+
+```
+library(shiny)
+
+textInput("name", "What is your name?")
+numericInput("age", "How old are you?", NA, min = 0, max = 150)
+```
+
+makes a question + input box which you can map to a variable like input$age and input$name
+
+Shiny requires a shiny server to run R. check out more at shiny.rstudio.com
+
+## Websites 
+
+put your .Rmd files in a single directory, index.Rmd will be the home page
+add a YAML file names _site.yml to provide navigation for the site: 
+
+```
+name: "My Website"
+navbar: 
+  title: "My Website"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Viridis Colors"
+      href: 1-example.html
+    - text: "Terrain Colors"
+      href: 3-inline.html
+```
+
+execute rmarkdown::render_site() to build _site, a directory of files ready to deploy as a standalone static website.
+read more at http://bit.ly/RMarkdownWebsites
+
+## Other Formats
+
+bookdown - makes it easy to write books. See the book Authoring Books with R Markdown orr see bookdown.org
+prettydoc - lightweight document formats with a range of themes 
+rticles - compiles a selection of formats for specific scientific journals
+
+see rmarkdown.rstudio.com/formats.html for a list of more formats 
+
+
+

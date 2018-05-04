@@ -1,0 +1,485 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "January 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nycflights13)
+library(viridis)
+```
+
+
+There are 3 families of verbs that are designed to work with relational data: 
+
+* Mutating Joins: Adds new variables to one data frame from matching observations in another
+* Filtering Joins: Filters observations from one data frame based on whether or not they match an observation in the other table 
+* Set Operations: Treats observations as if they were set elements
+
+```{r}
+# tables
+airlines
+airports
+planes
+weather
+
+# Imagine you wanted to draw the route each plane flies from its origin to its destination. What variables would you need? What tables would you need to combine? 
+
+# From the flights table we would use origin and dest. From the airports table we would use the longitude and latitude variables. We would merge the flights with airports twice: Once to get the location of the origin airport, and once to get the location of the dest airport.
+
+# I forgot to draw the relationship between weather and airports. What is the relationshop and how should it appear on the diagram? 
+
+# The variable origin in weather is matched with faa in airports
+
+# Weather only contains information for the origin NYC airports. If it contained weather records for all airports in the USA, what additional relation would it define with flights? 
+
+# dest
+
+# We know that some days of the year are "special," and fewer people than usual fly on them. How might you represent that data as a data frame? What would be the primary keys of that table? How would it connect to the existing tables? 
+
+# One could add a table of special dates, where they are classified as days in which < x people flew. The primary key would be dates, and it would connect to flights
+
+```
+
+### Keys 
+
+Two types of keys: 
+
+* Primary Keys uniquely identify an observation in its own table. For example, planes$tailnum is a primary key because it uniquely identifies each plane in the planes table. 
+
+* Foreign Keys uniquely identify an observation in another table. For example, flights$tailnum is a foreign key because it appears in the flights table where it matches each flight to a unique plane.
+
+```{r}
+
+# A primary key should consist of only unique values. One way to test if something is a primary key is to check if there are more than 2 matching values in a column
+
+planes %>% 
+  count(tailnum) %>% 
+  filter(n > 1)
+
+weather %>% 
+  count(year, month, day, hour, origin) %>% 
+  filter(n > 1)
+
+# sometimes a table doesn't have an explicit primary key
+
+flights %>% 
+  count(year, month, day, flight) %>% 
+  filter(n > 1)
+
+flights %>% 
+  count(year, month, day, tailnum) %>% 
+  filter(n > 1)
+
+# If a table lacks a primary key, sometimes it is useful to add one using mutate and row_number(). This is called a surrogate key. 
+
+# adding a surrogate key to flights
+
+flights %>% 
+  arrange(year, month, day, sched_dep_time, carrier, flight) %>% 
+  mutate(flight_id = row_number()) %>% 
+  glimpse()
+
+```
+
+```{r}
+
+# Identify the keys in the following sets
+
+# playerID, yearID, stint
+
+Lahman::Batting %>% 
+  group_by(playerID, yearID, stint) %>% 
+  filter(n() > 1) %>% 
+  nrow()
+
+# year, sex, name 
+
+babynames::babynames %>% 
+  group_by(year, sex, name) %>% 
+  filter(n() > 1) %>% 
+  nrow
+
+# location and time of the measurement, lat, long, year, month
+
+nasaweather::atmos %>% 
+  group_by(lat, long, year, month) %>% 
+  filter(n() > 1) %>% 
+  nrow()
+
+# id
+ 
+fueleconomy::vehicles %>% 
+  group_by(id) %>% 
+  filter(n() > 1) %>% 
+  nrow()
+
+
+# There is no primary key for diamonds. Since there are less distinct rows than there are number of rows, there is no combination of variables that uniquely identifies the observations. In linear algebra, we could say that matrix is linearly dependent 
+
+ggplot2::diamonds %>% 
+  distinct() %>% 
+  nrow()
+
+nrow(ggplot2::diamonds)
+```
+
+### Mutating Joins
+
+A mutating join allows you to combine variables from two tables. It first matches observations by their keys, then copies across variables from one table to the other. 
+
+```{r}
+# to see whats going on, we make a narrower data set
+
+flights2 <- flights %>% 
+  select(year:day, hour, origin, dest, tailnum, carrier)
+
+flights2
+
+# add the full airline name to the flights 2 data
+
+flights2 %>% 
+  select(-origin, -dest) %>% 
+  left_join(airlines, by = "carrier")
+
+# We added the name variable above. We can do the same thing with the following 
+
+flights2 %>% 
+  select(-origin, -dest) %>% 
+  mutate(name = airlines$name[match(carrier, airlines$carrier)])
+```
+
+### Understanding Joins
+
+```{r}
+
+x <- tribble(
+  ~key, ~val_x,
+  1, "x1",
+  2, "x2",
+  3, "x3"
+)
+
+y <- tribble(
+  ~key, ~val_y,
+  1, "y1",
+  2, "y2",
+  4, "y3"
+)
+
+```
+
+#### Inner Join
+
+```{r}
+
+# an inner join matches 2 tables wherever their keys are equal. The most important property of an inner join is that unmatched rows are not in the result. As a result, its very easy to lose observations. 
+
+x %>% 
+  inner_join(y, by = "key")
+```
+
+#### Outer Joins
+
+An outer join keeps observations that appear in at least one of the tables. 
+
+* A left join keeps all observations in x
+* a right join keeps all observations in y
+* a full join keeps all observations in x and y
+
+#### Duplicate Keys
+
+```{r}
+
+x <- tribble(
+  ~key, ~val_x,
+  1, "x1",
+  2, "x2",
+  2, "x3",
+  1, "x4"
+)
+
+x
+
+y <- tribble(
+  ~key, ~val_y,
+  1, "y1",
+  2, "y2"
+)
+
+y
+
+# join when one table has duplicate keys
+
+left_join(x, y, by = "key")
+
+# When both tables have duplicate keys, this results in all possible combinations (the cartesian product): 
+
+x2 <- tribble(
+  ~key, ~val_x,
+  1, "x1",
+  2, "x2",
+  2, "x3",
+  3, "x4"
+)
+
+
+y2 <- tribble(
+  ~key, ~val_y,
+  1, "y1",
+  2, "y2",
+  2, "y3",
+  3, "y4"
+)
+
+left_join(x, y, by = "key")
+
+```
+
+### Defining the Key Columns
+
+We can use other variables besides key to join.
+
+By not defining b = "column", it defaults to by = "NULL" and uses all the variables that occur in both tables.
+
+```{r}
+# by = "NULL"
+
+flights2 %>% 
+  left_join(weather)
+
+# by = character vector
+
+flights2 %>% 
+  left_join(planes, by = "tailnum")
+
+# by a named character vector, by = c("a" = "b"). The column name from x will be taken by default
+
+flights2 %>% 
+  left_join(airports, c("dest" = "faa"))
+
+flights2 %>% 
+  left_join(airports, c("origin" = "faa"))
+```
+
+
+```{r}
+
+# Compute the avg delay by destination, then join on the airports data frame so you can show the spatial distribution of delays. 
+
+airports %>% 
+  semi_join(flights, c("faa" = "dest")) %>% 
+  ggplot(aes(lon, lat)) + 
+    borders("state") + 
+    geom_point() + 
+    coord_quickmap()
+
+avg_dest_delays <- flights %>% 
+  group_by(dest) %>% 
+  summarize(delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  inner_join(airports, by = c(dest = "faa"))
+
+avg_dest_delays %>% 
+  ggplot(aes(lon, lat, color = delay)) + 
+    borders("state") + 
+    geom_point() + 
+    coord_quickmap()
+
+# Add the location of the origin and destination (i.e. the lat and lon) to flights
+
+flights %>% 
+  left_join(airports, by = c(dest = "faa")) %>% 
+  left_join(airports, by = c(origin = "faa")) %>% 
+  head()
+
+# Is there a relationship between the age of a plane and its delays? 
+
+plane_ages <- planes %>% 
+  mutate(age = 2013 - year) %>% 
+  select(tailnum, age)
+
+flights %>% 
+  inner_join(plane_ages, by = "tailnum") %>% 
+  group_by(age) %>% 
+  filter(!is.na(dep_delay)) %>% 
+  summarize(delay = mean(dep_delay)) %>% 
+  ggplot(aes(x = age, y = delay)) + 
+    geom_point() + 
+    geom_line()
+
+# What weather conditions make it more likely to see a delay? 
+
+flight_weather <- flights %>% 
+  inner_join(weather, by = c("origin" = "origin",
+                             "year" = "year",
+                             "month" = "month",
+                             "day" = "day",
+                             "hour" = "hour"))
+
+flight_weather %>% 
+  group_by(precip) %>% 
+  summarize(delay = mean(dep_delay, na.rm = TRUE)) %>% 
+  ggplot(aes(x = precip, y = delay)) + 
+    geom_line() + 
+    geom_point()
+
+# What happened on June 13, 2013? Display the spatial pattern of delays, and then use google to cross reference with the weather. 
+
+# there was a large series of storms in the southeastern us
+
+flights %>% 
+  filter(year == 2013, month == 6, day == 13) %>% 
+  group_by(dest) %>% 
+  summarize(delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  inner_join(airports, by = c("dest" = "faa")) %>% 
+  ggplot(aes(y = lat, x = lon, size = delay, color = delay)) + 
+    borders("state") + 
+    geom_point() + 
+    coord_quickmap() + 
+    scale_color_viridis()
+
+```
+
+### Other Implementations
+
+```{r}
+# base R merge can perform all 4 types of mutating join
+
+# inner_join
+merge(x, y)
+
+# left_join
+merge(x, y, all.x = TRUE)
+
+# right_join
+merge(x, y, all.y = TRUE)
+
+#full_join
+merge(x, y, all.x = TRUE, all.y = TRUE)
+
+```
+
+### Filtering Joins
+
+Filtering joins match observations in the same way as mutating joins, but affect the observations, not the variables. 
+
+semi_join(x, y) keeps all observations in x that have a match in y
+anti_join(x, y) drops all observations in x that have a match in y 
+
+```{r}
+
+# top 10 most popular destinations
+
+top_dest <- flights %>% 
+  count(dest, sort = TRUE) %>% 
+  head(10)
+
+top_dest
+
+# can be done with filter, but inefficient for multiple variables
+
+flights %>% 
+  filter(dest %in% top_dest$dest)
+
+# semi-join connects 2 tables like a mutating join, but instead of adding new columns, it only keeps the rows in x that have a match in y
+
+flights %>% 
+  semi_join(top_dest)
+
+# only the existence of a match is important. It doesn't matter which observation is matched. 
+
+# the inverse of a semi_join is an anti_join. anti_join only keeps the rows which don't have a match. Anti joins are useful for diagnosing mismatches. 
+
+# flights without a match in planes
+
+flights %>% 
+  anti_join(planes, by = "tailnum") %>% 
+  count(tailnum, sort = TRUE)
+
+```
+
+```{r}
+
+# What does it mean for a flight to have a missing tailnum? What do the tail numbers that don't have a matching record in planes have in common? 
+
+# American Airlines and Envoy Airlines don't report tail numbers
+
+flights %>% 
+  anti_join(planes, by = "tailnum") %>% 
+  count(carrier, sort = TRUE)
+
+# Filter flights to only show flights with planes that have flown at least 100 flights
+
+planes_atleast100 <- flights %>% 
+  group_by(tailnum) %>% 
+  count() %>% 
+  filter(n > 100)
+
+flights %>% 
+  semi_join(planes_atleast100, by = "tailnum")
+
+# Combine fueleconomy::vehicles and fueleconomy::common to find the only the records for the most common models
+
+fueleconomy::vehicles %>% 
+  semi_join(fueleconomy::common, by = c("make", "model"))
+
+# What does anti_join(flights, airports, by = c("dest" = "faa")) tell you?
+
+# These are flights which go to an airport that is not in FAA list of destinations - likely foreign airports
+
+# What about anti_join(airports, flights, by = c("faa" = "dest"))?
+
+# These are airports where there are no flights from NY in 2013
+
+```
+
+### Join Problems 
+
+To avoid problems: 
+
+  * Identify the variables that form the primary key in each table 
+  * Check that none of the variables in the primary key are missing 
+  * Check that foreign keys match primary keys in another table with an anti_join
+
+### Set Operations
+
+intersect(x,y) - return only observations in both x and y
+union(x.y) - return unique observations in x and y
+setdiff(x,y) - return observations in x, but not in y
+
+```{r}
+
+df1 <- tribble(
+  ~x, ~y,
+  1, 1,
+  2, 1
+)
+
+df2 <- tribble(
+  ~x, ~y,
+  1, 1,
+  1, 2
+)
+
+# intersect
+
+intersect(df1, df2)
+
+# union - note that we get 3 rows, not 4
+
+union(df1, df2)
+
+# setdiff
+
+setdiff(df1, df2)
+
+# setdiff 
+
+setdiff(df2, df1)
+
+```
+
+

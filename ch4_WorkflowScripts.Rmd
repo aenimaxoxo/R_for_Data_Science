@@ -1,0 +1,13 @@
+---
+title: "Ch4"
+author: "Michael Rose"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```
+No worthwhile scripts in chapter 4
+```

@@ -1,0 +1,488 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "January 8, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+table1
+table2
+table3
+table4a
+table4b
+```
+
+#### For data to be tidy: 
+
+```
+1. Each variable must have its own column
+2. Each observation must have its own row
+3. Each value must have its own cell
+
+Rules: 
+
+1. Put each dataset into a tibble
+2. Put each variable in a column
+
+```
+
+
+```{r}
+# compute rate per 10,000
+
+table1 %>% 
+  mutate(rate = cases/population * 10000)
+
+# compute cases per year 
+
+table1 %>% 
+  count(year, wt = cases)
+
+# visualize changes over time
+
+ggplot(table1, aes(year, cases)) + 
+  geom_line(aes(group = country), color = "grey50") + 
+  geom_point(aes(color = country))
+
+# Compute the rate for table2, and table4a + table4b. 
+
+# extract the number of tb cases per year
+
+table2_cases <- filter(table2, type == "cases")[["count"]]
+
+# extract the matching population per country per year
+
+table2_country <- filter(table2, type == "cases")[["country"]]
+
+# extract the number of TB cases per country per year
+
+table2_year <- filter(table2, type == "cases")[["year"]]
+
+# divide cases by population, and multiple by 10,000
+
+table2_population <- filter(table2, type == "population")[["count"]]
+
+# store back in the appropriate place
+
+table2_clean <- tibble(
+  country = table2_country,
+  year = table2_year,
+  population = table2_population,
+  rate = table2_cases / table2_population)
+
+table2_clean
+
+# recreate the plot showing change in cases over time using table2 instead of table1. What do you need to do first? 
+
+# first, filter the tibble to only include the rows which represent the cases variable 
+
+table2 %>% 
+  filter(type == "cases") %>% 
+  ggplot(aes(year, count)) + 
+  geom_line(aes(group = country), color = "grey50") + 
+  geom_point(aes(color = country))
+
+```
+
+### Spreading and Gathering 
+
+#### Gathering 
+
+A common problem is a dataset in which some of the column names are not names of variables, but values or a variable. We can gather these columns into a new pair of variables
+
+```{r}
+
+# Three Parameters: 
+# The set of columns thar represent values, not variables
+# The name of the variable whose values form the column names (key)
+# The name of the variable whose values are spread over the cells
+
+# original
+
+table4a
+
+# gather
+
+tidy_4a <- table4a %>% 
+  gather(`1999`, `2000`, key = "year", value = "cases")
+
+
+tidy_4b <- table4b %>% 
+  gather(`1999`, `2000`, key = "year", value = "population")
+
+# join into 1 table
+
+left_join(tidy_4a, tidy_4b)
+```
+
+#### Spreading 
+
+The opposite of gathering. For when an observation is scattered across multiple rows. 
+
+```{r}
+
+# original
+
+table2
+
+# Two Parameters: 
+# The column that contains variable names, the key column
+# The column that contains values from multiple variables, the value column
+
+spread(table2, key = type, value = count)
+
+```
+
+Gather makes tables narrower and longer
+Spread makes tables wider and shorter
+
+```{r}
+
+# Why are gather() and spread() not perfectly symmetrical? 
+
+stocks <- tibble(
+  year = c(2015, 2015, 2016, 2016),
+  half = c(1, 2, 1, 2),
+  return = c(1.88, 0.59, 0.92, 0.17)
+)
+
+stocks
+
+stocks %>% 
+  spread(year, return) %>% 
+  gather("year", "return", `2015`, `2016`, convert = TRUE)
+
+#The functions spread and gather are not perfectly symmetrical because column type information is not transferred between them. In the original table the column year was numeric, but after the spread gather cycle it is character. This is because with gather, variable names are always converted to a character vector. 
+
+# The convert argument tries to convert character vectors to the appropriate type. In the background, this uses the type.convert function 
+
+
+# Why does this code fail? 
+
+table4a %>% 
+  gather(1999, 2000, key = "year", value = "cases")
+
+# The nonstandard numbers 1999 and 2000. This is looking for the 1999th and 2000th column of the dataframe. The following works: 
+
+table4a %>% 
+  gather(`1999`, `2000`, key = "year", value = "cases")
+
+
+# Why does spreading this tibble fail? How can you add a new column to fix this problem? 
+
+people <- tribble(
+~name, ~key, ~value, 
+"Phillip Woods", "age", 45, 
+"Phillip Woods", "height", 186,
+"Phillip Woods", "age", 50,
+"Jessica Cordero", "age", 37, 
+"Jessica Cordero", "height", 156
+)
+
+# duplicate identifiers for Phillip Wood's age.
+people %>% 
+  spread(key, value)
+
+# Adding an observation number
+
+people <- tribble(
+~name, ~key, ~value, ~obs,
+"Phillip Woods", "age", 45, 1, 
+"Phillip Woods", "height", 186, 1,
+"Phillip Woods", "age", 50, 2, 
+"Jessica Cordero", "age", 37, 1, 
+"Jessica Cordero", "height", 156, 1
+)
+
+
+people %>% 
+  spread(key, value)
+
+# tidy this tibble
+
+preg <- tribble(
+  ~pregnant, ~male, ~female, 
+  "yes", NA, 10,
+  "no", 20, 12
+)
+
+preg %>% 
+  gather(sex, count, male, female) %>% 
+  mutate(pregnant = pregnant == "yes",
+         female = sex == "female") %>% 
+  select(-sex)
+```
+
+### Seperating and Pull
+
+seperate() pulls one column into multiple columns, by splitting wherever a seperator character appears. 
+
+```{r}
+
+# original
+
+table3
+
+# seperate
+
+table3 %>% 
+  separate(rate, into = c("cases", "population"))
+
+# by default, separate splits at any non-alphanumeric character. To specify splitting character: 
+
+table3 %>% 
+  separate(rate, into = c("cases", "population"), sep = "/")
+
+# we can ask separate to try to figure out types instead of defaulting to character vectors
+
+table3 %>% 
+  separate(rate, into = c("cases", "population"), sep = "/", convert = TRUE)
+
+# We can also separate with a vector of integers
+
+table3 %>% 
+  separate(year, into = c("century", "year"), sep = 2)
+```
+
+### Unite
+
+Unite is the inverse of separate. It converts multiple columns into a single column. 
+
+```{r}
+# unite 
+
+table5 %>% 
+  unite(new, century, year)
+
+# add a seperator so we can remove the underscore
+
+table5 %>% 
+  unite(new, century, year, sep = "")
+
+# What do the extra and fill arguments do in separate? 
+
+# extra
+# If sep is a character vector, this controls what happens when there are too many pieces. There are three valid options:
+# "warn" (the default): emit a warning and drop extra values.
+# "drop": drop any extra values without a warning.
+# "merge": only splits at most length(into) times
+
+# fill	
+# If sep is a character vector, this controls what happens when there are not enough pieces. There are three valid options:
+# "warn" (the default): emit a warning and fill from the right
+# "right": fill with missing values on the right
+# "left": fill with missing values on the left
+
+toy1 <- tibble(x = c("a,b,c", "d,e,f,g","h,i,j")) %>% 
+  separate(x, c("one", "two", "three"), extra = "merge")
+
+toy1
+
+toy2 <- tibble(x = c("a,b,c", "d,e", "f,g,i")) %>% 
+  separate(x, c("one", "two", "three"), fill = "right")
+
+toy2
+
+# both unite and separate have a remove argument. What does it do? Why would you set it to false? 
+
+# remove	
+# If TRUE, remove input column from output data frame. 
+
+# if you set it to false, it would create an extra variable 
+
+# compare and contrast separate() and extract(). Why are there three variations of separation (by position, by separator, and with groups), but only one unite?
+
+# The function extract finds groups using a regular expression and then splits it into columns. Separate splits the column by any character specified, making multiple ways to split a character string. In unite, there doesn't need to be a lot of options, since they will all be combined by the columns specified. 
+
+```
+
+### Missing Values
+
+A value can be missing either:
+
+* Explicitly - with an NA
+* Implicityl - not present in data 
+
+```{r}
+
+stocks <- tibble(
+  year = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  qtr = c(1,2,3,4,2,3,4), 
+  return = c(1.88, 0.59, 0.35, NA, 0.92, 0.17, 2.66)
+)
+
+stocks
+
+# make implicit missing value explicit 
+
+stocks %>% 
+  spread(year, return)
+
+# make explicit values implicit
+
+stocks %>% 
+  spread(year, return) %>% 
+  gather(year, return, `2015`:`2016`, na.rm = TRUE)
+
+# another tool for making missing values explicit is complete()
+
+stocks %>% 
+  complete(year, qtr)
+
+# complete() takes a set of columns and finds all unique combinations. It then ensures that the original dataset contains all those values and fills in explicit NAs where necessary. 
+
+# fill() is used for the cse when missing values indicate that the previous value should be carried forward: 
+
+treatment <- tribble(
+  ~person,           ~treatment, ~response,
+  "Derrick Whitmore", 1,         7,
+  NA,                 2,         10,
+  NA,                 3,         9, 
+  "Katherine Burke",  1,         4
+)
+
+treatment %>% 
+  fill(person)
+
+# compare and contrast the fill arguments to spread and complete
+
+# In spread, the fill argument explicitly sets the value to replace NAs. In complete, the fill argument also sets a value to replace NAs but it is named list, allowing for different values for different variables. Also, both cases replace both implicit and explicit missing values.
+
+# Spread: Fill argument explicitly sets the value to replace NAs. 
+# Complete: Fill argument also sets a value to replace NAs, but it is named list, allowing for different values for different variables 
+# both cases replace implicit and explicit missing values 
+
+```
+
+### Case Study
+
+The WHO dataset contains tuberculosis cases broken down by year, country, age, gender and diagnosis method. This data comes from the 2014 World Health Organization Global Tuberculosis Report. 
+
+```{r}
+
+who <- tidyr::who
+
+who
+
+# This data contains redundant columns, odd variable codes, and many missing values
+
+# We can gather together all the columns aside from year, country, iso2,3 into one generic name. We know the cells represent the count of cases
+
+who1 <- who %>% 
+  gather(
+    new_sp_m014:newrel_f65, key = "key", 
+    value = "cases",
+    na.rm = TRUE
+  )
+
+# get an indea of the structure of the values
+
+who1 %>% 
+  count(key)
+
+# checking the data dictionary
+
+# first 3 letters of column denate whether the column contains old or new cases of TB.
+# next 2 letters describe the type of TB
+#   rel stands for relapse
+#   ep stands for extrapulmonary TB
+#   sn stands for cases of pulmonary tb that could not be diagnosed by a pulmmonary smear (smear negative)
+#   sp stands for cases of pulmonary tb that could be diagnosed by a pulmonary smear (smear positive) 
+# The 6th letter gives the sex of TB patients. The dataset groups cases by males(m) and females(f)
+# The remaining numbers give the age group 
+#   014 = 0-14
+#   1524 = 15-24
+#   2534 = 25-34 
+#   3544 = 35-44
+#   4554 = 45-54
+#   5564 = 55-64
+#   65 = 65+ 
+
+# instead of new_rel, we have newrel.
+
+who2 <- who1 %>% 
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel"))
+
+who2
+
+# we can separate the values in each code with two passes of separate(). The first pass splits the code at each underscore
+
+who3 <- who2 %>% 
+  separate(key, c("new", "type", "sexage"), sep = "_")
+
+who3
+
+# since every row has new type, we can drop it. Since we have country, we don't need iso2 and iso3
+
+who3 %>% 
+  count(new)
+
+who4 <- who3 %>% 
+  select(-new, -iso2, -iso3)
+
+# Next we will separate sexage into sex and age by splitting after the first character
+ 
+who5 <- who4 %>% 
+  separate(sexage, c("sex", "age"), sep = 1)
+
+who5
+
+# Woo! Its tidy! 
+
+# refactoring: 
+
+who %>% 
+  gather(code, value, new_sp_m014:newrel_f65, na.rm = TRUE) %>% 
+  mutate(code = stringr::str_replace(code, "newrel", "new_rel")) %>% 
+  separate(code, c("new", "var", "sexage")) %>% 
+  select(-new, -iso2, -iso3) %>% 
+  separate(sexage, c("sex", "age"), sep = 1)
+
+# In this case study, I set na.rm = TRUE just to make it easier to check that we had the correct values. Is this reasonable? Thinka bout how missing values are represented in this dataset. Are there implicit missing values? Whats the difference between an NA and zero? 
+
+# check number of zeros
+who1 %>% 
+  filter(cases == 0) %>% 
+  nrow()
+
+# treating 0s as implicitly null
+
+who %>% 
+  gather(new_sp_m014:newrel_f65, key = "key", value = "cases") %>% 
+  group_by(country, year) %>% 
+  mutate(missing = is.na(cases)) %>% 
+  select(country, year, missing) %>% 
+  distinct() %>% 
+  group_by(country, year) %>% 
+  filter(n() > 1)
+
+
+# What happens if we neglect the mutate step? 
+# The seperate by _ messes up and we don't have properly separated data
+
+# I claimed that iso2 and iso3 were redundant with country. Confirm this claim.
+
+who3 %>% 
+  select(country, iso2, iso3) %>% 
+  distinct() %>% 
+  group_by(country) %>% 
+  filter(n() > 1)
+
+# For each country, year, and sex compute the total number of cases of TB. Make an informative visualization of the data 
+
+who5 %>% 
+  group_by(country, year, sex) %>% 
+  filter(year > 1995) %>% 
+  summarize(cases = sum(cases)) %>% 
+  unite(country_sex, country, sex, remove = FALSE) %>% 
+  ggplot(aes(x = year, y = cases, group = country_sex, color = sex)) + 
+    geom_line()
+```
+

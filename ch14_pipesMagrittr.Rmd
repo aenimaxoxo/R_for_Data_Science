@@ -1,0 +1,46 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "January 20, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+```
+
+```{r}
+diamonds <- ggplot2::diamonds
+diamonds2 <- diamonds %>% 
+  dplyr::mutate(price_per_carat = price / carat)
+
+pryr::object_size(diamonds)
+pryr::object_size(diamonds2)
+pryr::object_size(diamonds, diamonds2)
+
+# pipe won't work with functions that
+# use the current environment, ex assigning variables 
+# use lazy evaluation
+
+# Other tools from magrittr
+
+# when running through functions that don't return anything, use %T>% 
+
+rnorm(100) %>% 
+  matrix(ncol = 2) %>% 
+  plot() %>% 
+  str()
+
+rnorm(100) %>% 
+  matrix(ncol = 2) %T>% 
+  plot() %>% 
+  str()
+
+# if you pass a function individual vectors as opposed to a dataframe, %$% 'explodes' out the variables in a data frame so that they can be referred to explicitly
+
+mtcars %$% 
+  cor(disp, mpg)
+
+```
+

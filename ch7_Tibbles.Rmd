@@ -1,0 +1,154 @@
+---
+title: "ch7"
+author: "Michael Rose"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+```{r}
+
+# coerce a data frame to a tibble
+
+as_tibble(iris)
+
+# create a new tibble
+
+tibble(
+  x = 1:5,
+  y = 1,
+  z = x^2 + y
+)
+
+# tibble never
+# 1. changes the type of inputs
+# 2. changes the name of variables
+# 3. creates row names
+
+# create a tibble with a nonsyntactic name
+
+tb <- tibble(
+  `:)` = "smile",
+  ` ` = "space",
+  `2000` = "number"
+)
+
+tb
+
+# tribble is a transposed tibble. It is customized for data entry
+
+tribble(
+  ~x, ~y, ~z, 
+  #--/--/----
+  "a", 2, 3.6,
+  "b", 1, 8.5
+)
+
+# Tibbles print method shows only the first 10 rows
+
+tibble(
+  a = lubridate::now() + runif(1e3) * 86400,
+  b = lubridate::now() + runif(1e3) * 30,
+  c = 1:1e3,
+  d = runif(1e3),
+  e = sample(letters, 1e3, replace = TRUE)
+)
+
+# when more of the data frame needs to be shown. width = Inf shows all columns
+
+nycflights13::flights %>% 
+  print(n = 10, width = Inf)
+
+# view the whole data set
+
+nycflights13::flights %>% 
+  View()
+```
+
+### Subsetting
+
+```{r}
+
+df <- tibble(
+  x = runif(5), 
+  y = rnorm(5)
+)
+
+# extract by name
+
+df$x
+
+df[["x"]]
+
+# extract by position
+
+df[[1]]
+
+# to use these in a pipe, we need the placeholder .
+
+df %>% .$x
+
+df %>% .[["x"]]
+
+# if an older function that is incompatible is encountered, use as.data.frame
+
+class(as.data.frame(tb))
+
+# How can you tell if an object is a tibble
+
+class(mtcars)
+
+class(as.tibble(mtcars))
+
+# compare and contrast
+
+qf <- data.frame(abc = 1, xyz = "a")
+
+qf$x
+qf[, "xyz"]
+qf[, c("abc", "xyz")]
+
+rf <- as.tibble(qf)
+rf$x
+rf[, "xyz"]
+rf[, c("abc", "xyz")]
+
+# If you have the name of a variable stored in an object, e.g. var <- "mpg" how can you extract the reference variable from a tibble? 
+# you can use df[["mpg"]]
+
+# practice with nonsyntactics
+
+annoying <- tibble(
+  `1` = 1:10, 
+  `2` = `1` * 2 + rnorm(length(`1`))
+)
+
+# a
+annoying$`1`
+
+# b 
+ggplot(data = annoying) + geom_point(mapping = aes(x = `1`, y = `2`))
+
+# c
+annoying <- annoying %>% 
+  mutate(`3` = `2` / `1`)
+
+# d
+annoying <- rename(annoying, one = `1`, two = `2`, three = `3`)
+glimpse(annoying)
+
+# What does tibble::enframe do? When might you use it?
+# It converts atomic vectors into data frames with an extra column for names
+
+enframe(c(1, 2, 3))
+
+# What option controls how many additional column names are printed at the footer of a tibble? 
+# ?print.tbl_df
+# n_extra
+
+```
+

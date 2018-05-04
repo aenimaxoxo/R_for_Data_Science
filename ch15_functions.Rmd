@@ -1,0 +1,673 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "January 21, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lubridate)
+library(tidyverse)
+```
+
+### When should you write a function? 
+
+```{r}
+# functions should be written whenever code is going to be pasted more than twice
+
+df <- tibble::tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+# code to be turned into function for inputs a, b, c, d
+
+(df$a - min(df$a, na.rm = TRUE)) / (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+
+# break down
+
+# input
+x <- df$a
+# plugging x in
+(x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+
+
+# we are computing the range 3 times
+rng <- range(x, na.rm = TRUE)
+# plugging it in
+(x - rng[1]) / (rng[2] - rng[1])
+
+# turn it into a function
+rescale01 <- function(x){
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+# test it
+rescale01(x)
+rescale01(c(0,5,10))
+
+# simplify original problem with function
+df$a <- rescale01(df$a)
+df$b <- rescale01(df$b)
+df$c <- rescale01(df$c)
+df$d <- rescale01(df$d)
+
+# if rescale fails (like with infinite values), we only need to modify the function
+x <- c(1:10, Inf)
+rescale01(x)
+
+# fix function
+rescale01 <- function(x){
+  rng <- range(x, na.rm = TRUE, finite = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+# DRY - Do Not Repeat Yourself
+```
+
+```{r}
+# why is TRUE not a parameter to rescale01? What would happen if x contained a single missing value, and na.rm was false? 
+
+# if na.rm was false, then the function would return NA. TRUE is not a parameter because we generally always want to remove NA and it is not a part of the functions that is generally changed
+
+rescale01_alt <- function(x, finite = TRUE){
+  rng <- range(x, na.rm = finite, finite = finite)
+  (x - rng[1])/(rng[2]-rng[1])
+}
+
+rescale01_alt(c(NA, 1:5), finite = FALSE)
+rescale01_alt(c(NA, 1:5), finite = TRUE)
+
+# In the second variant of rescale01, infinite values are left unchanged. Rewrite rescale01 so that -Inf is mapped to 0, and Inf is mapped to 1
+
+rescale01 <- function(x){
+  rng <- range(x, na.rm = TRUE, finite = TRUE)
+  y <- (x - rng[1])/(rng[2] - rng[1])
+  y[y==Inf] <- 1
+  y[y==-Inf] <- 0
+  y
+}
+
+rescale01(c(Inf, -Inf, 0:5, NA))
+
+# Practice turning the following code snippets into functions 
+
+mean(is.na(x))
+
+prop_na <- function(x){
+  mean(is.na(x))
+}
+
+prop_na(c(NA, 0, NA, 0, NA))
+
+x / sum(x, na.rm = TRUE)
+
+weights <- function(x){
+  x / sum(x, na.rm = TRUE)
+}
+
+(y <- weights(0:5))
+
+# This function calculates the coefficient of variation (assuming that x can only take non-negative values). The coefficient of variation is the standard deviation divided by the mean: 
+
+sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
+
+coef_of_var <- function(x){
+  sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
+}
+
+coef_of_var(runif(10))
+
+# do https://nicercode.github.io/intro/writing-functions.html
+
+herb <- read_csv("seed_root_herbivores.csv")
+
+mean(herb$Height)
+var(herb$Height)
+# sample size
+length(herb$Height)
+
+# standard error
+sqrt(var(herb$Height) / length(herb$Height))
+
+# standard error of dry weight
+sqrt(var(herb$Weight) / length(herb$Weight))
+
+# syntax
+
+standard.error <- function(x){
+  sqrt(var(x) / length(x))
+}
+
+standard.error(herb$Height)
+standard.error(herb$Weight)
+
+# defining variables within functions
+
+standard.error <- function(x){
+  v <- var(x)
+  n <- length(x)
+  sqrt(v/n)
+}
+
+standard.error(herb$Height)
+
+# Variance function
+
+x <- herb$Height
+n <- length(x)
+(1/(n-1))
+m <- mean(x)
+x - m
+(x - m)^2
+sum((x-m)^2)
+
+# var
+(1/(n-1)) * sum((x-m)^2)
+var(x)
+
+# clean up global environment
+rm(n, x, m)
+
+variance <- function(x){
+  n <- length(x)
+  m <- mean(x)
+  (1/(n-1))*sum((x-m)^2)
+}
+
+variance(herb$Height)
+var(herb$Height)
+
+variance(herb$Weight)
+var(herb$Weight)
+
+# an aside on floating point comparisons
+
+variance(herb$Height) == var(herb$Height)
+
+variance(herb$Height) - var(herb$Height)
+
+sqrt(2) * sqrt(2)
+
+sqrt(2) * sqrt(2) - 2
+
+# don't use ==, use abs(x-y) < eps
+
+skewness <- function(x){
+  m <- mean(x)
+  n <- length(x)
+  v <- var(x)
+  third.moment <- (1/(n-2)) * sum((x-m)^3)
+  third.moment / var(x)^(3/2)
+}
+
+skewness(herb$Height)
+skewness(herb$Weight)
+
+variance <- function(x){
+  # remove missing values
+  x <- x[!is.na(x)]
+  n <- length(x)
+  m <- mean(x)
+  sq_err <- (x-m)^2
+  sum(sq_err) / (n-1)
+}
+
+var(1:10)
+variance(1:10)
+
+skewness <- function(x){
+  x <- x[!is.na(x)]
+  n <- length(x)
+  m <- mean(x)
+  m3 <- sum((x-m)^3) / n
+  s3 <- sqrt(sum((x-m)^2) / (n-1))
+  m3 / s3
+}
+
+skewness(rgamma(10, 1, 1))
+
+# Write both_na(), a function that takes two vectors of the same length and returns the number of positions that have an NA in both vectors
+
+both_na <- function(x, y){
+  vec1 <- sum(is.na(x))
+  vec2 <- sum(is.na(y))
+  vec1 + vec2
+}
+
+que1 <- c(NA, "a", "b", "c", NA, NA)
+que2 <- c(NA, "a", "b", "c", NA, "d")
+
+both_na(que1, que2)
+
+both_na <- function(x, y){
+  sum(is.na(x) & is.na(y))
+}
+
+both_na(que1, que2)
+
+# What do the following functions do? Why are they useful even though they are short? 
+
+# this checks whether x is a directory
+is_directory <- function(x){
+  file.info(x)$isdir
+}
+
+# this checks whether the file is accessible 
+is_readable <- function(x){file.access(x, 4) == 0}
+
+```
+
+### Functions are for humans and computers 
+
+```{r}
+
+# read the source code for each of the following 3 functions, puzzle out what they do, and then brainstorm better names
+f1 <- function(string, prefix){
+  substr(string, 1, nchar(prefix)) == prefix
+}
+
+# f1 checks whether the string of names has a common prefix. A better name would be same_prefix 
+
+f2 <- function(x){
+  if (length(x) <= 1)
+    return(NULL)
+  x[-length(x)]
+}
+
+# f2 checks if the length of x is <= 1, and if not it removes the last element. A better name would be drop_last
+
+f3 <- function(x, y){
+  rep(y, length.out = length(x))
+}
+
+# f3 replicates the element y exactly length(x) times. A better name would be num_reps
+
+f3(c(1, 2, 3, 4, 5), "z")
+
+# Compare and contrast rnorm() and MASS::mvrnorm(). How could you make them more consistent? 
+
+# rnorm samples from the univariate normal distribution and mvrnorm samples from the multivariate normal distribution. They could be made more consistent by having the same name and using method overloading to read in parameters and decide whether to use the uni or multivariate norm function
+
+# Make a case for why norm_r(), norm_d(), etc, would be better than rnorm(), dnorm(). Make a case for the opposite
+
+# If we grouped by norm, it would show that the functions are all based around the normal distribution. If we grouped by r, d, we know every r function samples from the distribution following (such as rnorm, runif, rexp), and every d function calculate the probability density (dnorm, dbinom, dexp, dunif)
+```
+
+### Conditional Execution
+
+```{r}
+# Return a logical vector describing whether or not each element of a vector is named 
+
+has_name <- function(x){
+  nms <- names(x)
+  if (is.null(nms)){
+    rep(FALSE, length(x))
+  } else {
+    !is.na(nms) & nms != ""
+  }
+}
+
+```
+
+#### Conditions
+
+if given a long chain of if statements, a useful technique is the switch function
+
+ex: 
+
+function(x, y, op){
+  switch(op,
+    plus = x + y, 
+    minus = x - y,
+    times = x * y,
+    divide = x / y,
+    stop("Unknown op!"))
+}
+
+### Code Style
+
+```{r}
+# good
+
+if (y < 0 && debug){
+  message("Y is negative")
+}
+
+if (y == 0){
+  log(x)
+} else {
+  y ^ x
+}
+
+```
+
+```{r}
+# what is the difference between if and ifelse? 
+# The keyword if checks one condition, whereas ifelse checks multiple conditions
+
+#x <- 3
+
+#ifelse(x %%2 == 0){
+#  TRUE
+#  FALSE
+#}
+
+
+# write a greeting function tht says good morning, afternoon, or evening depending on the time of day
+good_x <- function(time = hour(lubridate::now())){
+  if (time < 12){
+    print('good morning')
+  }
+  else if (time < 18){
+    print('good afternoon')
+  }
+  else {
+      print('good evening')
+  }
+}
+
+good_x()
+
+# implement a fizzbuzz function. 
+
+fizzbuzz <- function(n){
+  if (n %% 3 == 0 & n%%5 == 0){
+    print('fizzbuzz')
+  }
+  if (n%%3 == 0){
+    print('fizz')
+  }
+  if (n%%5 == 0){
+    print('buzz')
+  }
+}
+
+
+fizzbuzz(15)
+
+
+fizzbuzz <- function(x) {
+  stopifnot(length(x) == 1)
+  stopifnot(is.numeric(x))
+  # this could be made more efficient by minimizing the
+  # number of tests
+  if (!(x %% 3) & !(x %% 5)) {
+    print("fizzbuzz")
+  } else if (!(x %% 3)) {
+    print("fizz")
+  } else if (!(x %% 5)) {
+    print("buzz")
+  }
+}
+fizzbuzz(6)
+fizzbuzz(10)
+fizzbuzz(15)
+fizzbuzz(2)
+
+# weird
+
+# how could you use cut() to simplify this set of nested if else statements? 
+
+if (temp <= 0){
+  "freezing"
+} else if (temp <= 10){
+  "cold"
+} else if (temp <= 20) {
+  "cool"
+} else if (temp <= 30) {
+  "warm"
+} else {
+  "hot"
+}
+
+temp <- seq(-10, 50, by = 5)
+cut(temp, c(-Inf, 0, 10, 20, 30, Inf), right = TRUE, 
+    labels = c("Freezing", "Cold", "Cool", "Warm", "Hot"))
+
+# to have intervals open on the left (using <), change te argument to right = FALSE
+
+temp <- seq(-10, 50, by = 5)
+cut(temp, c(-Inf, 0, 10, 20, 30, Inf), right = FALSE, 
+    labels = c("Freezing", "Cold", "Cool", "Warm", "Hot"))
+
+# two advantages of cut: 
+# 1. It works on vectors, whereas if only works on a single value 
+# 2. To change comparisons, we only need to change the right argument
+
+# What happens if you use switch() with numeric values? 
+
+x <- '3'
+switch(x,
+       '1' = "a",
+       '2' = "b",
+       '3' = "c"
+       )
+
+# it works if we treat the numeric value as a string, but not otherwise
+
+# What does this switch() call do? What happens if x is 'e'?
+
+x <- 'a'
+switch(x,
+       a = ,
+       b = 'ab',
+       c = ,
+       d = 'cd'
+       )
+
+# it returns ab for a or b, cd for c or d and nothing otherwise
+
+```
+
+### Function Arguments
+
+```{r}
+# Compute confidence interval around mean using normal approx
+mean_ci <- function(x, conf = 0.95){
+  se <- sd(x) / sqrt(length(x))
+  alpha <- 1 - conf 
+  mean(x) + se * qnorm(c(alpha / 2, 1 - alpha / 2))
+}
+
+x <- runif(100)
+
+mean_ci(x)
+
+mean_ci(x, conf = 0.99)
+
+# weighted summary statistics
+
+wt_mean <- function(x, w){
+  sum(x * w) / sum(x)
+}
+
+wt_var <- function(x, w){
+  mu <- wt_mean(x, w)
+  sum(w * (x - mu) ^ 2) / sum(w) 
+}
+
+wt_sd <- function(x, w){
+  sqrt(wt_var(x, w))
+}
+
+# what happens if x and w are not the same length? 
+
+wt_mean(1:6, 1:3)
+
+# R has vector recycling rules. Therefore its important to check preconditions and throw an error if they are not true
+
+wt_mean <- function(x, w){
+  if (length(x) != length(w)){
+    stop("'x' and 'w' must be same length", call. = FALSE)
+  }
+  sum(w * x)/sum(x)
+}
+
+wt_mean(1:6, 1:3)
+
+# There is a tradeoff between how much time is spent making a function robust vs how long is spent writing it
+
+wt_mean <- function(x, w, na.rm = FALSE){
+  if (!is.logical(na.rm)){
+    stop('na.rm must be logical')
+  }
+  if (length(na.rm) != 1){
+    stop('na.rm must be length 1')
+  }
+  if (length(x) != length(w)){
+    stop('x and w must be same length')
+  }
+  
+  if (na.rm){
+    miss <- is.na(x) | is.na(w)
+    x <- x[!miss]
+    w <- w[!miss]
+  }
+  sum(w * x) / sum(x)
+}
+
+# stopifnot checks if each argument is true and throws an error message if not
+
+wt_mean <- function(x, w, na.rm = FALSE){
+  stopifnot(is.logical(na.rm), length(na.rm == 1))
+  stopifnot(length(x) == length(w))
+  
+  if (na.rm){
+    miss <- is.na(x) | is.na(w)
+    x <- x[!miss]
+    w <- w[!miss]
+  }
+  sum(w * x) / sum(x)
+}
+
+wt_mean(1:6, 6:1, na.rm = 'foo')
+
+```
+
+### Dot-dot-dot(...)
+
+```{r}
+# ... captures any arguments that aren't otherwise matched, allowing functions like
+sum(1,2,3,4,5,6,7,8,9,10)
+
+stringr::str_c('a', 'b', 'c')
+
+# this is a useful catch all if your function wraps around another function
+
+commas <- function(...) stringr::str_c(..., collapse = ', ')
+commas(letters[1:10])
+
+rule <- function(..., pad = '-'){
+  title <- paste0(...)
+  width <- getOption('width') - nchar(title) - 5
+  cat(title, " ", stringr::str_dup(pad, width), "\n", sep = "")
+}
+
+rule("Important Output")
+```
+
+```{r}
+
+# What does commas(letters, collapse = "-") do? Why?
+commas(letters, collapse = "-")
+# throws an error. Collapse is passed to str_c as part of ..., so it tries to run str_c(letters, collapse="-", collapse=", ")
+
+# It'd be nice if you could supply multiple characters to the pad argument, eg. rule("Title", pad = "-+"). Why doesn't this currently work? How could you fix it? 
+
+rule <- function(..., pad = "-"){
+  title <- paste0(...)
+  width <- getOption("width") - nchar(title) - 5
+  cat(title, " ", stringr::str_dup(pad, width), '\n', sep = "")
+}
+
+rule("Important Output")
+rule("Important Output", pad = "-+")
+
+# this does not work because the width is preset
+
+rule <- function(..., pad = "-") {
+  title <- paste0(...)
+  width <- getOption("width") - nchar(title) - 5
+  padchar <- nchar(pad)
+  cat(title, " ", 
+      stringr::str_dup(pad, width %/% padchar), 
+      # if not multiple, fill in the remaining chars
+      stringr::str_sub(pad, 1, width %% padchar), 
+      "\n", sep = "")
+}
+
+rule("Important Output")
+rule("Important Output", pad = "+-")
+rule("Important Output", pad = "123")
+
+# What does the trim argument to mean do? When might you use it? 
+
+# trim removes a % of the extrema from the sample when calculating the mean. This is useful for calculating a mean that is robust to outliers
+
+# The default value for the method argument to cor() is c("pearson", "kendall", "spearman"). What does that mean? What value is used by default? 
+
+# It means that cor() can use the methods pearson, kendall, or spearman. Pearson is used by default 
+
+```
+
+### Return Values 
+
+```{r}
+
+# a common early return reason is empty inputs
+
+comp_func <- function(x, y, z){
+  if (length(x) == 0 || length(y) == 0){
+    return(0)
+  }
+  else{
+    # rest of code
+  }
+}
+
+
+```
+
+### Writing Pipeable Functions
+
+2 main types: 
+
+- transformation: a clear 'primary object' that is passed in as the first arg and a modified version is returned
+- side effect: do an action, like save a file, draw a plot, etc
+
+```{r}
+# print number of missing values in a data frame
+
+show_missings <- function(df){
+  n <- sum(is.na(df))
+  cat("Missing values: ", n, "\n", sep = "")
+  # make sure the df doesn't get printed out
+  invisible(df)
+}
+
+x <- show_missings(mtcars)
+
+# the df is still there, its just not printed out
+
+class(x)
+
+dim(x)
+
+mtcars %>% 
+  show_missings() %>% 
+  mutate(mpg = ifelse(mpg < 20, NA, mpg)) %>% 
+  show_missings() 
+
+```
+
+### Environment
+
+```{r}
+
+```
+

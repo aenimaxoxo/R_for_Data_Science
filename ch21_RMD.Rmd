@@ -1,0 +1,183 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "April 3, 2018"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+params: 
+  my_class: "suv"
+  start: !r lubridate::ymd("2015-01-01")
+  snapshot: !r lubridate::ymd_hms("2015-01-01 12:30:00")
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+class <- mpg %>% filter(class == params$my_class)
+```
+
+```{r}
+smaller <- diamonds %>% filter(carat <= 2.5)
+```
+
+We have data about `r nrow(diamonds)` diamonds. Only `r nrow(diamonds) - nrow(smaller)` are larger than 2.5 carats. The distribution of the remainder is shown below:
+
+```{r, echo=FALSE}
+smaller %>% 
+  ggplot(aes(carat)) +
+    geom_freqpoly(binwidth = 0.01)
+```
+
+
+Text Formatting 
+
+*italic*
+**bold**
+superscript^2^
+subscript~2~
+
+```
+*italic* or _italic_
+**bold** or __bold__
+`code`
+superscript^2^ and subscript~2~
+```
+
+Headings 
+
+# Header 1
+## Header 2
+### Header 3
+#### Header 4
+
+```
+# 1
+## 2
+### 3 etc
+```
+
+Lists
+
+* Bulleted Item 1
+
+* Item 2
+  * Item 2a
+  * Item 2b
+  
+1. Numbered List Item 1
+
+1. Item 2. The numbers are incremented automatically in the output 
+
+Links and Images
+
+<http://example.com>
+
+[linked phrase](http://example.com)
+
+![Optional Caption](path/to/img.png)
+
+2. Using the RMarkdown Quick Reference, figure out how to : 
+  a. Add a footnote
+    A [linked phrase][id] 
+  b. Add a horizontal Show in New WindowClear OutputExpand/Collapse Output
+Error in diamonds %>% filter(carat <= 2.5) : 
+  could not find function "%>%"
+Show in New WindowClear OutputExpand/Collapse Output
+
+Modify Chunk OptionsRun Current ChunkModify Chunk OptionsRun All Chunks AboveRun Current ChunkModify Chunk OptionsRun All Chunks AboveRun Current ChunkModify Chunk OptionsRun All Chunks AboveRun Current Chunk
+Expand/Collapse Output
+Modify Chunk OptionsRun All Chunks AboveRun Current Chunk
+rule
+    ------
+    ******
+  c. Add a block quote
+    > Block Quote Part 1
+    > Block Quote Part 2
+  
+  
+[id]: http://example.com
+
+# Code Chunks
+ 
+```{r}
+
+```
+
+
+# Caching
+
+If we have code chunks with computations that take a long time, we can set our code chunk with r cache=TRUE
+e.g
+
+{r raw_data}
+rawdata <- readr::read_csv("a-large-csv.csv")
+
+{r processed_data, cached = TRUE}
+
+
+# Global Options
+
+call the following in a code chunk
+
+knitr::opts_chunk$set()
+
+e.g.
+
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+
+This sets the comment formatting and ensures that the code and output are closely entwined. 
+
+For a report we can do 
+
+knitr::opts_chunk$set(echo = FALSE)
+
+# Inline Code
+
+when inserting numbers into text, format() is your friend. e.g.
+
+```{r}
+comma <- function(x) format(x, digits = 2, big.mark = ",")
+comma(3452345)
+comma(0.12358124331)
+```
+
+# Parameters
+
+# Fuel Economy for `r params$my_class`s 
+
+```{r, message = FALSE}
+ggplot(class, aes(displ, hwy)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+```
+
+Alternatively if you need to produce many such parameterized reports, we can call rmarkdown::render() with a list of params
+
+```{r}
+rmarkdown::render(
+"fuel-economy.Rmd", 
+params = list(my_class = "suv")
+)
+```
+
+The following creates a report for each value of class found in mpg
+
+```{r}
+# Create a data frame that has one row for each class, giving the filename of the report and the params it should be given
+reports <- tibble(
+  class = unique(mpg$class),
+  filename = stringr::str_c("fuel-economy-", class, ".html"),
+  params = purrr::map(class, ~list(my_class = .))
+)
+
+reports
+
+# Then we match the column names to the argument names of render() and use purrr's parallel walk to call render() one for each row
+
+reports %>% 
+  select(output_file = filename, params) %>% 
+  purrr::pwalk(rmarkdown::render, input = "fuel-economy.Rmd")
+```
+

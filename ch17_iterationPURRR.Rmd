@@ -1,0 +1,889 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "February 4, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(microbenchmark)
+```
+
+### For Loops
+
+```{r}
+df <- tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+# calculate median of each variable
+# make a median vector
+output <- vector("double", ncol(df))
+# loop it out
+for (i in seq_along(df)){
+  output[[i]] <- median(df[[i]])
+}
+
+output
+
+# seq_along is just like 1:length(x), except it handles zero length vectors correctly
+
+y <- vector("double", 0)
+
+seq_along(y)
+
+1:length(y)
+```
+
+```{r}
+# Write for loops to 
+
+# a. Compute the mean of every column in mtcars
+
+mean_mtcars <- vector("double", ncol(mtcars))
+names(mean_mtcars) <- names(mtcars)
+for (i in seq_along(names_mtcars)){
+  mean_mtcars[[i]] <- mean(mtcars[[i]])
+}
+mean_mtcars
+
+output_mtcars <- vector("double", ncol(mtcars))
+names(output_mtcars) <- names(mtcars)
+for (i in names(mtcars)){
+  output_mtcars[i] <- mean(mtcars[[i]])
+}
+output_mtcars
+
+# b. Determine the type of each column in nycflights13
+
+flights <- nycflights13::flights
+output_flights <- vector("list", ncol(flights))
+names(output_flights) <- names(flights)
+for (i in seq_along(names(flights))){
+  output_flights[[i]] <- class(flights[[i]])
+}
+output_flights
+
+data("flights", package = "nycflights13")
+output <- vector("list", ncol(flights))
+names(output) <- names(flights)
+for (i in names(flights)){
+  output[[i]] <- class(flights[[i]])
+}
+output
+
+# c. Compute the number of unique values in each column or iris
+
+iris_uniq <- vector("double", ncol(iris))
+names(iris_uniq) <- names(iris)
+for (i in names(iris)){
+  iris_uniq[i] <- length(unique(iris[[i]]))
+}
+iris_uniq
+
+# d. Generate 10 random normals for each of mu = -10, 0, 10, 100
+# Think about the output, sequence, and body before writing the loop
+
+inputs <- c(-10, 0, 10, 100)
+outputs <- vector("double", length(inputs))
+for (i in seq_along(inputs)){
+  outputs[i] <- rnorm(i)
+}
+outputs
+
+# number to draw
+n <- 10
+# values of the mean
+mu <- c(-10, 0, 10, 100)
+normals <- vector("list", length(mu))
+for (i in seq_along(normals)){
+  normals[[i]] <- rnorm(n, mean = mu[i])
+}
+normals
+
+# we don't need a for loop for this because rnorm recycles means
+matrix(rnorm(n * length(mu), mean = mu), ncol = n)
+
+# Eliminate the for loop in each of the following examples by taking advantage of an existing function that works with vectors 
+
+# a. 
+
+out <- ""
+for (x in letters){
+  out <- stringr::str_c(out, x)
+}
+out
+
+# str_c already works with vectors, so use the collapse argument to return a single string
+
+stringr::str_c(letters, collapse = "")
+
+# b. 
+
+x <- sample(100)
+sd <- 0
+for (i in seq_along(x)){
+  sd <- sd + (x[i] - mean(x))^2
+}
+sd <- sqrt(sd / (length(x) - 1))
+sd
+
+# or we could use the base R sd function
+
+# c. 
+x <- runif(100)
+out <- vector("numeric", length(x))
+out[1] <- x[1]
+for (i in 2:length(x)){
+  out[i] <- out[i - 1] + x[i]
+}
+out
+
+# cumulative sum
+cumsum(x)
+
+all.equal(cumsum(x), out)
+
+# It is common to see for loops that don't preallocate the output and instead increase the length of a vector at each step:
+
+output <- vector("integer", 0)
+for (i in seq_along(x)){
+  output <- c(output, lengths(x[[i]]))
+}
+output
+
+# How does this affect performance? Design and execute an experiment
+
+# 1. Define a function that appens to an integer vector
+add_to_vector <- function(n){
+  output <- vector("integer", 0)
+  for (i in seq_len(n)) {
+    output <- c(output, i)
+  }
+  output
+  }
+
+microbenchmark(add_to_vector(10000), times = 3)
+
+# one that preallocates the vector
+
+add_to_vector_2 <- function(n){
+  output <- vector("integer", n)
+  for (i in seq_len(n)){
+    output[[i]] <- i
+  }
+  output
+  }
+
+microbenchmark(add_to_vector_2(10000), times = 3)
+
+# The preallocated space is much faster, ~ 100 times
+```
+
+### For Loop Variations
+
+#### Modify an Existing Object
+
+```{r}
+# from ch 15, we want to rescale every column in a df
+df <- tibble(
+  a = rnorm(10), 
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+rescale01 <- function(x){
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+df$a
+rescale01(df$a)
+
+# 3 components
+# Output - same as input
+# sequence - iterate over each column
+# body - apply rescale
+
+for (i in seq_along(df)){
+  df[[i]] <- rescale01(df[[i]])
+}
+
+df
+
+
+# name the results vector like so
+results <- vector("list", length(x))
+names(results) <- names(x)
+
+for (i in seq_along(x)) {
+  name <- names(x)[[i]]
+  value <- x[[i]]
+}
+
+```
+
+#### unknown Output Length
+
+```{r}
+# simulate random vectors of random lengths
+# inefficient, O(n^2) time
+
+means <- c(0, 1, 2)
+
+output <- double()
+for (i in seq_along(means)){
+  n <- sample(100, 1)
+  output <- c(output, rnorm(n, means[[i]]))
+}
+str(output)
+
+# a better solution. Save the outputs into a list, then combine into a single vector after the loop is done 
+
+out <- vector("list", length(means))
+for (i in seq_along(means)){
+  n <- sample(100, 1)
+  out[[i]] <- rnorm(n, means[[i]])
+}
+str(out)
+
+# flatten to a single vector
+str(unlist(out))
+
+```
+
+#### Unknown Sequence Length
+
+```{r}
+# you can write every for loop as a while loop, but you can't rewrite every while loop as a for loop 
+
+# how many tries it takes to get 3 heads in a row
+
+flip <- function() sample(c("T", "H"), 1)
+
+flips <- 0
+nheads <- 0
+
+while (nheads <  3){
+  if (flip() == "H"){
+    nheads <- nheads + 1
+  } else {
+    nheads <- 0
+  }
+  flips <- flips + 1
+}
+
+flips
+
+```
+
+```{r}
+# Imagine you have a directory fill of CSV files that you want to read in. You have their paths in a vector, and now want to read each one with read_csv(). Write the for loop that will load them into a single data frame
+
+# preallocate a list
+# read each file as data frame into an element in list
+# bind_rows to create a single data frame
+
+df <- vector("list", length(files))
+for (fname in seq_along(files)){
+  df[[i]] <- read_csv(files[[i]])
+}
+df <- bind_rows(df)
+
+# What happens if you use for (nm in names(x)) and x has no names? What if only some of the elements are named? What if the names are not unique? 
+
+# no names
+x <- 1:3
+print(names(x))
+for (nm in names(x)){
+  print(nm)
+  print(x[[nm]])
+}
+
+# names(x) is a vector of length 0, so it loops 0 times
+
+# some names
+
+x <- c(a = 1, 2, c = 3)
+names(x)
+
+for (nm in names(x)){
+  print(nm)
+  print(x[[nm]])
+}
+
+# throws a subscript out of bounds error
+
+# duplicate names 
+
+x <- c(a = 1, a = 2, c = 3)
+names(x)
+
+for (nm in names(x)){
+  print(nm)
+  print(x[[nm]])
+}
+
+# when names are duplicated, nm pulls the first names value multiple times. 
+
+# Write a function that prints the mean of each numeric column in a data frame, along with its name. Extra Challenge: What function was used to make sure numbers lined up nicely, even though the variable names had different lengths?
+
+show_mean <- function(df, digits = 2){
+  # get max length of any variable in dataset
+  maxstr <- max(str_length(names(df)))
+  for (nm in names(df)){
+    if (is.numeric(df[[nm]])){
+      cat(str_c(str_pad(str_c(nm, ":"), maxstr +1L, side = "right"),
+                format(mean(df[[nm]]), digits = digits, nsmall = digits),
+                sep = " "),
+          "\n")
+    }
+  }
+}
+
+show_mean(iris)
+
+# What does this code do? How does it work? 
+
+
+trans <- list( 
+  disp = function(x) x * 0.0163871,
+  am = function(x) {
+    factor(x, labels = c("auto", "manual"))
+  }
+)
+
+
+for (var in names(trans)) {
+  # applies the function to the column of mtcars with the same name
+  mtcars[[var]] <- trans[[var]](mtcars[[var]])
+}
+
+# this mutates the disp and am columns in mtcars. It multiplies disp by a scalar and splits am into the factors auto or manual. The code works by looping over a list of functions
+```
+
+### For Loops vs. Functionals
+
+R is a functional programming language, so its possible to wrap up for loops in a function and call that function instead of using the for loop directly
+
+```{r}
+df <- tibble(
+  a = rnorm(10), 
+  b = rnorm(10), 
+  c = rnorm(10), 
+  d = rnorm(10)
+)
+
+# compute the mean of every column
+
+output <- vector("double", length(df))
+for (i in seq_along(df)){
+  output[[i]] <- mean(df[[i]])
+}
+
+output
+
+# since we may want to find means often, we extract it into a function
+
+col_mean <- function(df){
+  output <- vector("double", length(df))
+  for (i in seq_along(df)){
+    output[i] <- mean(df[[i]])
+  }
+  output
+}
+
+# say we want to add median and sd. It would be best to generalize the code
+
+col_summary <- function(df, fun){
+  out <- vector("double", length(df))
+  for (i in seq_along(df)){
+    out[i] <- fun(df[[i]])
+  }
+  out
+}
+
+col_summary(df, mean)
+
+```
+
+```{r}
+# Read the documentation for apply(). In the second case, what two for loops does it generalize? 
+
+# apply returns a vector or array or list of values obtained by applying a function to margins of an array or matrix. Basically, it maps a function to a column or row or column and rows. 
+
+# the second case is the following: stopifnot( apply(x, 2, is.vector))
+# this function generalizes 2 for loops in which the first loop goes through each row and checks if its a vector and the second goes through each column and checks if its a vector
+
+# Adapt col_summary() so that it only applies to numeric columns. You might want to start with an is_numeric() function that returns a logical vector that has a TRUE corresponding to each numeric column. 
+
+
+
+col_summary <- function(df, fun){
+  if (is.numeric(df)){
+  out <- vector("double", length(df))
+  for (i in seq_along(df)){
+    out[i] <- fun(df[[i]])
+    }
+  out
+  }
+  else{
+    print("Must be a numeric column!")
+  }
+}
+
+col_summary(df, mean)
+
+col_summary2 <- function(df, fun){
+  # test whether each column is numeric
+  numeric_cols <- vector("logical", length(df))
+  for (i in seq_along(df)){
+    numeric_cols[[i]] <- is.numeric(df[[i]])
+  }
+  # indexes of numeric columns
+  idxs <- seq_along(df)[numeric_cols]
+  # number of numeric columns
+  n <- sum(numeric_cols)
+  out <- vector("double", n)
+  for (i in idxs){
+    out[i] <- fun(df[[i]])
+  }
+  out
+}
+
+df <- tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = letters[1:10],
+  d = rnorm(10)
+)
+
+col_summary2(df, mean)
+# a lot of work for essentially the same thing as before. 
+```
+
+### The Map Functions
+
+```
+map() makes a list
+map_lgl() makes a logical vector
+map_int() makes an integer vector
+map_dbl() makes a double vector
+map_chr() makes a character vector
+```
+
+```{r}
+map_dbl(df, mean)
+map_dbl(df, median)
+map_dbl(df, sd)
+
+# with pipe
+
+df %>%  map_dbl(mean)
+df %>%  map_dbl(median)
+df %>%  map_dbl(sd)
+
+# all purrr functions are implemented in C. 
+# map uses ... to pass along additional arguments to .f (formula, cha rvector or an integer vector)
+map_dbl(df, mean, trim = 0.5)
+
+z <- list(x = 1:3, y = 4:5)
+map_int(z, length)
+
+```
+
+#### Shortcuts
+
+```{r}
+# create an anonymous function (lambda)
+models <- mtcars %>% split(.$cyl) %>%  map(function(df) lm(mpg~wt, data = df))
+
+# in purrr
+models <- mtcars %>% split(.$cyl) %>% map(~lm(mpg ~ wt, data = .))
+# . refers to the current list element (in the same way that i is used in a loop)
+
+models
+
+models %>%  map(summary) %>% map_dbl(~.$r.squared)
+
+# purrr lets you use a string. Very useful if we have a list of stats we want to iterate over
+models %>% map(summary) %>% map_dbl("r.squared")
+
+# integers can also be used to select elements by position
+x <- list(list(1, 2, 3), list(4, 5, 6), list(7, 8, 9))
+x %>% map_dbl(2)
+```
+
+#### Base R
+
+```{r}
+# lapply() is basically identical to map, except map meshes well with other purrr functions
+
+# sapply() is a wrapper around lapply that automatically simplifies the output
+
+x1 <- list(
+  c1 <- runif(5, 0.0, 1.0),
+  c2 <- runif(5, 0.0, 1.0),
+  c3 <- runif(5, 0.0, 1.0)
+)
+
+x2 <- list(
+  c1 <- runif(5, 0.0, 1.0),
+  c2 <- runif(5, 0.0, 1.0),
+  c3 <- runif(5, 0.0, 1.0)
+)
+
+threshold <- function(x, cutoff = 0.8) x[x > cutoff]
+
+# not certain what sapply will return
+x1 %>% sapply(threshold) %>% str()
+
+x2 %>% sapply(threshold) %>% str()  
+
+```
+
+```{r}
+# write code that uses one of the map functions to:
+
+# a. Compute the mean of every column in cars
+
+cars <- mtcars
+cars %>% map(mean)
+
+# b. Determine the type of each column in nycflights13::flights
+
+nycflights13::flights %>% map(class)
+nycflights13::flights %>% map_chr(typeof)
+
+# c. Compute the number of unique values in each column of iris
+
+iris %>% map_int(~length(unique(.)))
+
+# d. Generate 10 random normals for each of mu = -10, 0, 10, 100
+
+x <- c(-10, 0, 10, 100)
+map(c(-10, 0, 10, 100), rnorm, n = 10)
+
+# 2. How can you create a single vector that for each column in a data frame indicates whether or not its a factor? 
+
+mtcars %>% map_lgl(is.factor)
+
+# 3. What happens when you use the map functions on vectors that aren't lists? 
+# What does map(1:5, runif) do? Why? 
+
+map(1:5, runif)
+
+# the map function returns a list of lists of sizes 1:5 with uniform random variables placed on them 
+
+# What does map(-2:2, rnorm, n=5) do? Why?
+map(-2:2, rnorm, n = 5)
+# generates a list of 5 lists with 5 variables that are drawn from a normal distribution bounded between -2 and 2. 
+# This takes samples of n = 5 from normal distributions of  means -2, -1, 0, 1, 2 and returns a list of numeric vectors of length 5
+map_dbl(-2:2, rnorm, n = 5)
+# returns an error. map_dbl expects the function to return an atomic vector of length 1
+
+# rewrite map(x, function(df) lm(mpg ~ wt, data = df)) to eliminate the anonymous function 
+
+map(list(mtcars), ~ lm(mpg~wt, data = .))
+
+```
+
+
+### Dealing With Failure
+
+```{r}
+# safely() returns a list with 2 elements: the original result and an error object. If there was no errors, error will be Null
+
+safe_log <- safely(log)
+str(safe_log(10))
+str(safe_log(a))
+
+# safely is designed to work with map
+
+x <- list(1, 10, 'a')
+y <- x %>% map(safely(log))
+str(y)
+
+# this would e easier to work with if we had 2 lists: one with all of the erors and one of all the output. We can use purrr:transpose
+
+y <- y %>% transpose()
+str(y)
+
+# typically we either look at the values of x where y is an error or work with the values of y that are OK
+
+is_ok <- y$error %>% map_lgl(is_null)
+x[!is_ok]
+x[is_ok]
+
+# like safely(), possibly() always succeeds. Its simpler than safely() because you give it a default value to return when there is an error
+
+x <- list(1, 10, 'a')
+x %>% map_dbl(possibly(log, NA_real_))
+
+# quietly() performs a similar role to safely(), but instead of capturing errors, it captures printed output, messages, and warnings
+
+x <- list(1, -1)
+x %>% map(quietly(log)) %>% str()
+```
+
+### Mapping Over Multiple Arguments
+
+```{r}
+
+# simulate some random normals with different means
+
+mu <- list(5, 10, -3)
+mu %>% map(rnorm, n = 5) %>% str()
+
+# What if we also want to vary the standard deviation? Iterate over the indices and index into vectors of means and sds
+
+sigma <- list(1, 5, 10)
+seq_along(mu) %>% map(~rnorm(5, mu[[.]], sigma[[.]])) %>% str()
+
+# this obfuscates the intent of the code though (aka looks like garbage)
+
+# map2 iterates over 2 vectors in parallel
+
+map2(mu, sigma, rnorm, n = 5) %>% str()
+
+# map2 is just a wrapper function for a for loop
+
+map2 <- function(x, y, f, ...){
+  out <- vector("list", length(x))
+  for (i in seq_along(x)) {
+    out[[i]] <- f(x[[i]], y[[i]], ...)
+  }
+  out
+}
+
+# we could imagine map3, map4, etc. But purrr provides pmap()
+
+n <- list(1, 3, 5)
+args1 <- list(n, mu, sigma)
+args1 %>% pmap(rnorm) %>% str()
+
+# if you don't name the elements of list, pmap() will use positional matching when calling the function. 
+args2 <- list(mean = mu, sd = sigma, n = n)
+args2 %>% pmap(rnorm) %>% str()
+
+# since the arguments are all the same length, it makes sense to store them in a tibble
+
+params <- tribble(
+  ~mean, ~sd, ~n,
+      5,   1,  1, 
+     10,   5,  3,
+     -3,  10,  5
+)
+
+params %>% pmap(rnorm)
+
+```
+
+#### Invoking Different Functions
+
+```{r}
+# vary the function itself
+
+f <- c("runif", "rnorm", "rpois")
+param <- list(
+  list(min = -1, max = 1),
+  list(sd = 5),
+  list(lambda = 10)
+)
+
+# to handle this use invoke map
+
+invoke_map(f, param, n = 5) %>% str()
+
+# using tribble
+
+sim <- tribble(
+  ~f,   ~params,
+  "runif", list(min = -1, max = 1),
+  "rnorm", list(sd = 5),
+  "rpois", list(lambda = 10)
+)
+
+sim %>% mutate(sum = invoke_map(f, params, n = 10))
+
+```
+
+#### Walk 
+
+```{r}
+x <- list(1, "a", 3)
+x %>% walk(print)
+
+library(ggplot2)
+plots <- mtcars %>% split(.$cyl) %>% map(~ggplot(., aes(mpg, wt)) + geom_point())
+paths <- stringr::str_c(names(plots), ".pdf")
+
+pwalk(list(paths, plots), ggsave, path = tempdir())
+
+plots
+
+```
+
+### Other Patterns of For Loops
+
+```{r}
+
+# predicate functions 
+# predicate functions return either a single true or false. 
+# keep() or discard() keep elements of the input where predicate is TRUE or FALSE respectively
+
+iris %>% keep(is.factor) %>% str()
+
+iris %>% discard(is.factor) %>% str()
+
+# some() and every() determine if a predicate is true for any or for all of the elements
+
+x <- list(1:5, letters, list(10))
+x %>% some(is.character)
+x %>% every(is.character)
+x %>% every(is.vector)
+
+# detect() finds the first element where the predicate is true, and 
+# detect_index() returns its position
+
+x <- sample(10)
+x
+
+x %>% detect(~ . > 8)
+
+x %>% detect_index(~ . > 8)
+
+# head_while() and tail_while() take elements from the start or end of a vector while a predicate is true
+
+x %>% head_while(~ . > 3)
+
+x %>% tail_while(~ . > 5)
+
+# Reduce and Accumulate
+
+# from a list of data frames, reduce to a single data frame by joining elements together
+
+dfs <- list(
+  age = tibble(name = 'John', age = 30),
+  sex = tibble(name = c('John', 'Mary'), sex = c('M', 'F')),
+  trt = tibble(name = 'Mary', treatment = 'A')
+)
+
+dfs %>% reduce(full_join)
+
+# from a list of vectors find the intersection
+
+vs <- list(
+  c(1,3,5,6,10),
+  c(1,2,3,7,8,10),
+  c(1,2,3,4,8,9,10)
+)
+
+vs %>% reduce(intersect)
+
+# The reduce function takes a binary function (i.e. a function with 2 primary inputs) and applies it repeatedly to a list until there is only a single element left
+
+# accumulate is similar but it keeps all the interim results
+
+x <- sample(10)
+x
+
+x %>% accumulate(`+`)
+
+```
+
+```{r}
+# 1. Implement your own version of every() using a for loop. Compare it with purrr::every(). What does purrrs version do that your version doesnt? 
+
+x <- c(1,2,3,4,5,6,7)
+
+every2 <- function(x, fun, ...){
+  if (length(x) == 0){
+    FALSE
+  }
+  else {
+    for (i in x){
+      if (!fun(x)){
+        return(FALSE)
+      }
+    }
+  }
+  return(TRUE)
+}
+
+every3 <- function(.x, .p, ...){
+  for (i in .x){
+    if (!.p(i, ...)) {
+      return (FALSE)
+    }
+  }
+  return (TRUE)
+}
+
+x <- list(1:5, rnorm(-2:2, 5, n = 10), letters[8:16])
+x %>% every3(is.numeric)
+x %>% every3(is.vector)
+x %>% every3(is.character)
+x
+
+# purrrs actual code
+
+# function (.x, .p, ...) 
+# {
+#     .p <- as_mapper(.p, ...)
+#     for (i in seq_along(.x)) {
+#         val <- .p(.x[[i]], ...)
+#         if (is_false(val)) 
+#             return(FALSE)
+#         if (anyNA(val)) 
+#             return(NA)
+#     }
+#     TRUE
+# }
+
+# 2. Create an enhanced col_summary() that applies a summary function to every numeric column in a data frame
+
+# keep() keeps only the elements that evaluate to true. In this case, is.numeric
+# then it maps the function f to each column in the dataframe
+col_summary2 <- function(df, f, ...){
+  map(keep(df, is.numeric), f, ...)
+}
+
+col_summary2(iris, range)
+
+# 3. A possible base R equivalent of col_summary() is 
+col_sum3 <- function(df, f){
+  is_num <- vapply(df, is.numeric)
+  df_num <- df[, is_num]
+  
+  vapply(df_num, f)
+}
+# but it has a number of bugs as illustrated with the following inputs: 
+
+df <- tibble(
+  x <- 1:3,
+  y <- 3:1,
+  z = c("a", "b", "c")
+)
+
+col_sum3(df, mean)
+# has problems: doesn't always return numeric vector
+col_sum3(df[1:2], mean)
+col_sum3(df[1], mean)
+col_sum3(df[0], mean)
+
+# the problem is that sapply doesn't always return numeric vectors. If no columns are selected, instead of gracefully exiting, it returns an empty list. This causes an error since we can't use a list with []
+
+sapply(df[0], is.numeric)
+sapply(df[1], is.numeric)
+sapply(df[1:2], is.numeric)
+
+```
+
+

@@ -1,0 +1,479 @@
+---
+title: "Untitled"
+author: "Michael Rose"
+date: "January 7, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(hms)
+library(feather)
+```
+
+
+```
+read_csv() reads comma delimited files
+read_csv2() reads semicolon seperated files 
+read_tsv() reads tab-delimited files
+read_delim() reads in files with any delimiter
+read_fwf() reads fixed width files
+read_log() reads apache style log files 
+```
+
+```{r}
+movies <- read_csv("C3 2008Movies Cleaned.csv")
+
+head(movies)
+
+# experiment with an inline csv file
+
+read_csv("a,b,c,
+         1,2,3,
+         4,5,6")
+
+# use skip to skip metadata
+
+read_csv("The first line of metadata
+         The second line of metadata
+         x,y,z,
+         1,2,3", skip = 2)
+
+# can also use comment to skip all lines that start with a specific symbol, e.g. #
+
+read_csv("# a comment I want to skip
+         x,y,z
+         1,2,3", 
+         comment = "#")
+
+# if the data does not have column names, we can label rows sequentially as X1 -> Xn
+
+read_csv("1,2,3\n4,5,6", col_names = FALSE)
+
+# alternatively, passing col_names a character vector: 
+
+read_csv("1,2,3\n4,5,6", col_names = c("x", "y", "z"))
+
+# specify a character if NA values are not specifically NA values
+
+read_csv("a,b,c\n1,2,.", na=".")
+
+# What arguments do read_csv and read_tsv have in common? 
+
+union(names(formals(read_csv)), names(formals(read_tsv)))
+
+# col_names and col_types are used to specify the column names and how to parse the columns
+# locale is important for determining things like the enecoding and whether “.” or “,” is used as a decimal mark.
+# na and quoted_na control which strings are treated as missing values when parsing vectors
+# trim_ws trims whitespace before and after cells before parsing
+# n_max sets how many rows to read
+# guess_max sets how many rows to use when guessing the column type
+# progress determines whether a progress bar is shown.
+
+# What are the most important arguments to read_fwf()?
+
+# col_positions. Since fwf is fixed width format, col_positions tells the function where lines begin and end
+
+# Sometimes strings in a CSV file contain commas. To prevent them from causing problems, they need to be surrounded by a quoting character like " or `.
+# By convention, read_csv() assumes that the quoting character will be ", and if you want to change it you'll need to use read_delim instead. What arguments do you need to specify to read the following text into a dataframe? 
+
+read_delim("x,y\n1,`a,b`", delim = ",", quote = "`")
+
+# What is wrong with each of the following inline csv files? 
+
+# missing c column 
+read_csv("a,b\n1,2,3\n4,5,6")
+
+# What a mess. 3 headers, 2 in 2nd row, 4 in 3rd
+read_csv("a,b,c\n1,2\n1,2,3,4")
+
+# missing b values
+read_csv("a,b\n\"1")
+
+# idk, not sure why a,b are doubled
+read_csv("a,b\n1,2\na,b")
+
+# initially read_csv without a ; delimiter. Fixed to use read_delim. read_csv2 would also fix it
+read_delim("a;b\n1;3", delim = ";")
+```
+
+```
+Why read_csv over read.csv? 
+
+* 10x faster
+* produces tibbles 
+* more reproducibility 
+```
+
+### Parsing a Vector
+
+parse functions take a character vector and return a more specialized vector like a logical, integer, or date
+
+```{r}
+
+#logical 
+
+str(parse_logical(c("TRUE", "FALSE", "NA")))
+
+# numbers
+
+str(parse_integer(c("1", "2", "3")))
+
+# dates
+
+str(parse_date(c("2010-01-01", "1979-10-14")))
+
+# set specific values to NA
+
+parse_integer(c("1", "231", ".", "456"), na = ".")
+
+# parsing fail
+
+x <- parse_integer(c("123", "345", "abc", "123.45"))
+
+x
+```
+
+```
+parse_logical and parse_integer - self explanatory
+
+parse_double - strict numerical parser
+parse_number - flexible numerical parser
+
+parse_character - may be difficult due to character encodings
+
+parse_factor - creates factors, which R uses to represent categorical variables with fixed and known values
+
+parse_datetime, parse_date, parse_time - lots of different ways to write dates leads to complicated functions
+```
+
+### Numbers
+
+```{r}
+parse_double("1.23")
+
+# locale allows parse to adjust for localized methods of date / numbers / etc
+parse_double("1,23", locale = locale(decimal_mark = ","))
+
+# parse_number ignores non numeric characters before and after the number
+
+parse_number("$1000")
+parse_number("20%")
+parse_number("It costs $123.45")
+
+# used in america
+parse_number("$123,456,789")
+
+# used in many parts of europe
+parse_number("123.456.789", locale = locale(grouping_mark = "."))
+
+# used in switzerland
+parse_number("123`456`789", locale = locale(grouping_mark = "`"))
+```
+
+### Strings
+
+```{r}
+
+# Show UTF-8 representation of English characters
+
+charToRaw("Michael")
+
+# example of UTF-8
+
+x1 <- "El Ni\xf1o was particularly bad this year"
+x2 <- "\x82\xb1\x82\xf1\x82\xc9\x82\xbf\x82\xcd"
+
+parse_character(x1, locale = locale(encoding = "Latin1"))
+parse_character(x2, locale = locale(encoding = "Shift-JIS"))
+
+# If the encoding is not UTF-8 and it is not provided in the documentation
+
+guess_encoding(charToRaw(x1))
+guess_encoding(charToRaw(x2))
+```
+
+### Factors
+
+R uses factors to represent categorical variables that have a known set of possible values. 
+
+```{r}
+
+# give parse_factor a vector of known levels to generatea warning whenever an unexpected value is present 
+
+fruit <- c("apple", "banana")
+parse_factor(c("apple", "banana", "bananana"), levels = fruit)
+
+```
+
+### Dates, Date-Times, and Times
+
+```{r}
+
+# parse_datetime() expects an ISO8601 date-time. year -> month -> day -> hour -> minute -> second
+
+parse_datetime("2010-10-01T2010")
+
+# if time is omitted, it will be set to midnight 
+
+parse_datetime("2010-10-01")
+
+# parse_date() expects a four digit year, a - or /, the month, a - or /, then the day
+
+parse_date("2010-10-01")
+
+# parse_time() expects the hour, :, minutes, optionally : and seconds and an optional a.m., p.m. specifier
+
+parse_time("01:10 am")
+
+parse_time("20:10:01")
+```
+
+### Building a date-time format
+
+```
+
+Year
+  %Y - 4 digits
+  %y - 2 digits
+
+Month
+  %m - 2 digits
+  %b - abbreviated name, like jan
+  %B - full name, like January
+
+Day
+  %d - 2 digits
+  %e - optional leading space
+  
+Time
+  %H - 0-23 format
+  %I - 0-12, must be used with %p
+  %p - am, pm indicator
+  %M - minutes
+  %S - integer seconds
+  %OS - real seconds
+  %Z - time zone 
+  %z as offset from UTC, e.g. +0800
+  
+Non-digits
+  %. - skips one nondigit character
+  %* - skips any number of nondigits
+  
+```
+
+```{r}
+# example of above
+
+parse_date("01/02/15", "%m/%d/%y")
+
+parse_date("01/02/15", "%d/%m/%y")
+
+parse_date("01/02/15", "%y/%m/%d")
+
+parse_date("1 janvier 2015", "%d %B %Y", locale = locale("fr"))
+
+# What are the important arguments to locale? 
+
+# date and time formats, date_names, date_format, time_format
+# time_zone
+# numbers : decimal_mark, grouping_mark
+# encoding 
+
+# What happens if you try to set decimal_mark and grouping_mark to the same character?
+
+locale(decimal_mark = ".", grouping_mark = ".")
+
+# What happens to the default value of grouping_mark when you set decimal_mark to ","? 
+
+# the grouping_mark is set to . 
+
+locale(decimal_mark = ",")
+
+# What happens to the default value of decimal_mark when you set the grouping_mark to "."
+
+# it is set to , 
+
+locale(grouping_mark = ".")
+
+# the date_format and time_format options to locale set date and time formats
+
+locale()
+
+# examples parsing french dates
+
+parse_date("1 janvier 2015", "%d %B %Y", locale = locale("fr"))
+
+parse_date("14 oct. 1979", "%d %b %Y", locale = locale("fr"))
+
+# Whats the difference between read_csv and read_csv2? 
+
+# read_csv2 uses ; as a delimiter rather than ,. They are both special cases of read_delim
+
+# more practice creating formats
+
+d1 <- "January 1, 2010"
+d2 <- "2015-Mar-07"
+d3 <- "06-Jun-2017"
+d4 <- c("August 19 (2015)", "July 1 (2015)")
+d5 <- "12/30/14" #Dec 30, 2014
+t1 <- "1705"
+t2 <- "11:15:10.12 pm"
+
+parse_date(d1, "%B %d, %Y")
+parse_date(d2, "%Y-%b-%d")
+parse_date(d3, "%d-%b-%Y")
+parse_date(d4, "%B %d (%Y)")
+parse_date(d5, "%m/%d/%y")
+parse_time(t1, "%H%M")
+parse_time(t2, "%H:%M:%OS %p")
+```
+
+### Parsing a File
+
+```{r}
+# readr uses guess_parser and parse_guess() to guess what type of vector its reading 
+guess_parser("2010-10-01")
+guess_parser("15:01")
+guess_parser(c("1", "5", "9"))
+guess_parser(c("12,352,561"))
+
+str(parse_guess(c("2010-10-10")))
+```
+
+#### Problems
+
+```{r}
+challenge <- read_csv(readr_example("challenge.csv"))
+
+problems(challenge)
+
+# The integers after row 1000 are all actually doubles! Lets fix that
+
+# copy and paste the column specification into the original call
+challenge <- read_csv(
+  readr_example("challenge.csv"), 
+  col_types = cols(
+    x = col_integer(),
+    y = col_character()
+  )
+)
+
+# tweak the type of the x column
+
+challenge <- read_csv(
+  readr_example("challenge.csv"),
+  col_types = cols(
+    x = col_double(),
+    y = col_character()
+  )
+)
+
+# the first problem is fixed, but the last few y rows have dates stored as character vectors
+
+tail(challenge)
+
+# specify y as a date column
+
+challenge <- read_csv(
+  readr_example("challenge.csv"), 
+  col_types = cols(
+    x = col_double(),
+    y = col_date()
+  )
+)
+
+tail(challenge)
+
+# always supply col_type when using readr
+```
+
+### Other Strategies
+
+```{r}
+
+# if we guess just the first 1000 rows, it gives us integer and character
+
+challenge2 <- read_csv(
+  readr_example("challenge.csv"), 
+  guess_max = 1000
+)
+
+# but if we guess 1001 it guesses double and date correctly 
+challenge2 <- read_csv(
+  readr_example("challenge.csv"), 
+  guess_max = 1001
+)
+
+# sometimes its easier to diagnose problems if you read in all the columns as character vectors
+
+challenge2 <- read_csv(
+  readr_example("challenge.csv"), 
+  col_types = cols(
+    .default = col_character()
+  )
+)
+
+df <- tribble(
+  ~x, ~y, 
+  "1", "1.21",
+  "2", "2.32", 
+  "3", "4.56"
+)
+
+# df is chr vectors
+
+df
+
+# now df is parsed and has its column vectors changed
+
+type_convert(df)
+
+```
+
+
+### Writing to a File
+
+```
+readr has two functions to writing data back to disk: 
+write_csv() and write_tsv()
+
+They:
+  * Always encode in UTF-8
+  * Save dates and date-times in ISO8601 format so they are easily parsable
+  
+If you want to write to excel, use write_excel_csv()
+```
+
+```{r}
+write_csv(challenge, "challenge.csv")
+
+write_csv(challenge, "challenge-2.csv")
+read_csv("challenge-2.csv")
+
+# type information is lost when you save to CSV. As a result, you need to recreate the column specification each time you read it in
+
+# an alternative is write_rds and read_rds, which store data in R's custom binary format
+write_rds(challenge, "challenge.rds")
+read_rds("challenge.rds")
+
+# feather implements a fast binary file format that can be shared across programming language. Feather is faster than RDS, is usable outside R. The only difference is that RDS supports list-columns, which feather does not 
+
+write_feather(challenge, "challenge.feather")
+read_feather("challenge.feather")
+```
+
+```
+For other types of data: 
+
+haven reads SPSS, stata, and SAS files
+
+readxl reads excel files, both .xls and .xlsx
+
+DBI along with a database specific backend like (RMySQL, RSQLite, RPostgreSQL) allows running of sql queries against a database and returns a data frame
+
+For hierarchical data, use jsonlite for JSON and xml2 for XML 
+```
