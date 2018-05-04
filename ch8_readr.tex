@@ -1,0 +1,1491 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Untitled},
+            pdfauthor={Michael Rose},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{Untitled}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{Michael Rose}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \predate{\centering\large\emph}
+  \postdate{\par}
+  \date{January 7, 2018}
+
+
+\begin{document}
+\maketitle
+
+\begin{verbatim}
+read_csv() reads comma delimited files
+read_csv2() reads semicolon seperated files 
+read_tsv() reads tab-delimited files
+read_delim() reads in files with any delimiter
+read_fwf() reads fixed width files
+read_log() reads apache style log files 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{movies <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}\StringTok{"C3 2008Movies Cleaned.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Parsed with column specification:
+## cols(
+##   Movie = col_character(),
+##   RottenTomatoesScore = col_integer(),
+##   CreativeType = col_character(),
+##   StorySource = col_character(),
+##   Budget = col_integer(),
+##   BoxOfficeGross = col_number(),
+##   OpeningWeekendGross = col_number(),
+##   Genre = col_character(),
+##   MPAA = col_character(),
+##   RunTime = col_integer(),
+##   NumberScreensOpeningWeekend = col_integer(),
+##   GrossperScreenOpenWeekend = col_integer()
+## )
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(movies)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 12
+##   Movie    RottenTomatoesS~ CreativeType StorySource Budget BoxOfficeGross
+##   <chr>               <int> <chr>        <chr>        <int>          <dbl>
+## 1 21                     35 Contemporary Book        3.50e7       81159365
+## 2 10,000 ~                9 Historical   Original    1.05e8       94784201
+## 3 27 Dres~               40 Contemporary Original    3.00e7       76808654
+## 4 88 Minu~                5 Contemporary Original    3.00e7       16930884
+## 5 Aliens ~               13 SciFi        Sequel      4.00e7       41797066
+## 6 Alvin a~               27 Kids Fiction Other       7.00e7      217326336
+## # ... with 6 more variables: OpeningWeekendGross <dbl>, Genre <chr>,
+## #   MPAA <chr>, RunTime <int>, NumberScreensOpeningWeekend <int>,
+## #   GrossperScreenOpenWeekend <int>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# experiment with an inline csv file}
+
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"a,b,c,}
+\StringTok{         1,2,3,}
+\StringTok{         4,5,6"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Missing column names filled in: 'X4' [4]
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in rbind(names(probs), probs_f): number of columns of result is not
+## a multiple of vector length (arg 2)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: 1 parsing failure.
+## row # A tibble: 1 x 5 col     row col   expected  actual    file         expected   <int> <chr> <chr>     <chr>     <chr>        actual 1     2 <NA>  4 columns 3 columns literal data file # A tibble: 1 x 5
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 2 x 4
+##       a     b     c X4   
+##   <int> <int> <int> <chr>
+## 1     1     2     3 <NA> 
+## 2     4     5     6 <NA>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# use skip to skip metadata}
+
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"The first line of metadata}
+\StringTok{         The second line of metadata}
+\StringTok{         x,y,z,}
+\StringTok{         1,2,3"}\NormalTok{, }\DataTypeTok{skip =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Missing column names filled in: 'X4' [4]
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in rbind(names(probs), probs_f): number of columns of result is not
+## a multiple of vector length (arg 2)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: 1 parsing failure.
+## row # A tibble: 1 x 5 col     row col   expected  actual    file         expected   <int> <chr> <chr>     <chr>     <chr>        actual 1     1 <NA>  4 columns 3 columns literal data file # A tibble: 1 x 5
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 1 x 4
+##       x     y     z X4   
+##   <int> <int> <int> <chr>
+## 1     1     2     3 <NA>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# can also use comment to skip all lines that start with a specific symbol, e.g. #}
+
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"# a comment I want to skip}
+\StringTok{         x,y,z}
+\StringTok{         1,2,3"}\NormalTok{, }
+         \DataTypeTok{comment =} \StringTok{"#"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 3
+##       x     y     z
+##   <int> <int> <int>
+## 1     1     2     3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# if the data does not have column names, we can label rows sequentially as X1 -> Xn}
+
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"1,2,3}\CharTok{\textbackslash{}n}\StringTok{4,5,6"}\NormalTok{, }\DataTypeTok{col_names =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 3
+##      X1    X2    X3
+##   <int> <int> <int>
+## 1     1     2     3
+## 2     4     5     6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# alternatively, passing col_names a character vector: }
+
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"1,2,3}\CharTok{\textbackslash{}n}\StringTok{4,5,6"}\NormalTok{, }\DataTypeTok{col_names =} \KeywordTok{c}\NormalTok{(}\StringTok{"x"}\NormalTok{, }\StringTok{"y"}\NormalTok{, }\StringTok{"z"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 3
+##       x     y     z
+##   <int> <int> <int>
+## 1     1     2     3
+## 2     4     5     6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# specify a character if NA values are not specifically NA values}
+
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"a,b,c}\CharTok{\textbackslash{}n}\StringTok{1,2,."}\NormalTok{, }\DataTypeTok{na=}\StringTok{"."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 3
+##       a     b c    
+##   <int> <int> <chr>
+## 1     1     2 <NA>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# What arguments do read_csv and read_tsv have in common? }
+
+\KeywordTok{union}\NormalTok{(}\KeywordTok{names}\NormalTok{(}\KeywordTok{formals}\NormalTok{(read_csv)), }\KeywordTok{names}\NormalTok{(}\KeywordTok{formals}\NormalTok{(read_tsv)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "file"      "col_names" "col_types" "locale"    "na"       
+##  [6] "quoted_na" "quote"     "comment"   "trim_ws"   "skip"     
+## [11] "n_max"     "guess_max" "progress"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# col_names and col_types are used to specify the column names and how to parse the columns}
+\CommentTok{# locale is important for determining things like the enecoding and whether “.” or “,” is used as a decimal mark.}
+\CommentTok{# na and quoted_na control which strings are treated as missing values when parsing vectors}
+\CommentTok{# trim_ws trims whitespace before and after cells before parsing}
+\CommentTok{# n_max sets how many rows to read}
+\CommentTok{# guess_max sets how many rows to use when guessing the column type}
+\CommentTok{# progress determines whether a progress bar is shown.}
+
+\CommentTok{# What are the most important arguments to read_fwf()?}
+
+\CommentTok{# col_positions. Since fwf is fixed width format, col_positions tells the function where lines begin and end}
+
+\CommentTok{# Sometimes strings in a CSV file contain commas. To prevent them from causing problems, they need to be surrounded by a quoting character like " or `.}
+\CommentTok{# By convention, read_csv() assumes that the quoting character will be ", and if you want to change it you'll need to use read_delim instead. What arguments do you need to specify to read the following text into a dataframe? }
+
+\KeywordTok{read_delim}\NormalTok{(}\StringTok{"x,y}\CharTok{\textbackslash{}n}\StringTok{1,`a,b`"}\NormalTok{, }\DataTypeTok{delim =} \StringTok{","}\NormalTok{, }\DataTypeTok{quote =} \StringTok{"`"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 2
+##       x y    
+##   <int> <chr>
+## 1     1 a,b
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# What is wrong with each of the following inline csv files? }
+
+\CommentTok{# missing c column }
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"a,b}\CharTok{\textbackslash{}n}\StringTok{1,2,3}\CharTok{\textbackslash{}n}\StringTok{4,5,6"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: 2 parsing failures.
+## row # A tibble: 2 x 5 col     row col   expected  actual    file         expected   <int> <chr> <chr>     <chr>     <chr>        actual 1     1 <NA>  2 columns 3 columns literal data file 2     2 <NA>  2 columns 3 columns literal data
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 2 x 2
+##       a     b
+##   <int> <int>
+## 1     1     2
+## 2     4     5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# What a mess. 3 headers, 2 in 2nd row, 4 in 3rd}
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"a,b,c}\CharTok{\textbackslash{}n}\StringTok{1,2}\CharTok{\textbackslash{}n}\StringTok{1,2,3,4"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: 2 parsing failures.
+## row # A tibble: 2 x 5 col     row col   expected  actual    file         expected   <int> <chr> <chr>     <chr>     <chr>        actual 1     1 <NA>  3 columns 2 columns literal data file 2     2 <NA>  3 columns 4 columns literal data
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 2 x 3
+##       a     b     c
+##   <int> <int> <int>
+## 1     1     2    NA
+## 2     1     2     3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# missing b values}
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"a,b}\CharTok{\textbackslash{}n\textbackslash{}"}\StringTok{1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: 2 parsing failures.
+## row # A tibble: 2 x 5 col     row col   expected                     actual    file         expected   <int> <chr> <chr>                        <chr>     <chr>        actual 1     1 a     closing quote at end of file ""        literal data file 2     1 <NA>  2 columns                    1 columns literal data
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 1 x 2
+##       a b    
+##   <int> <chr>
+## 1     1 <NA>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# idk, not sure why a,b are doubled}
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"a,b}\CharTok{\textbackslash{}n}\StringTok{1,2}\CharTok{\textbackslash{}n}\StringTok{a,b"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 2
+##   a     b    
+##   <chr> <chr>
+## 1 1     2    
+## 2 a     b
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# initially read_csv without a ; delimiter. Fixed to use read_delim. read_csv2 would also fix it}
+\KeywordTok{read_delim}\NormalTok{(}\StringTok{"a;b}\CharTok{\textbackslash{}n}\StringTok{1;3"}\NormalTok{, }\DataTypeTok{delim =} \StringTok{";"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 2
+##       a     b
+##   <int> <int>
+## 1     1     3
+\end{verbatim}
+
+\begin{verbatim}
+Why read_csv over read.csv? 
+
+* 10x faster
+* produces tibbles 
+* more reproducibility 
+\end{verbatim}
+
+\subsubsection{Parsing a Vector}\label{parsing-a-vector}
+
+parse functions take a character vector and return a more specialized
+vector like a logical, integer, or date
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#logical }
+
+\KeywordTok{str}\NormalTok{(}\KeywordTok{parse_logical}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"TRUE"}\NormalTok{, }\StringTok{"FALSE"}\NormalTok{, }\StringTok{"NA"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  logi [1:3] TRUE FALSE NA
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# numbers}
+
+\KeywordTok{str}\NormalTok{(}\KeywordTok{parse_integer}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"1"}\NormalTok{, }\StringTok{"2"}\NormalTok{, }\StringTok{"3"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  int [1:3] 1 2 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# dates}
+
+\KeywordTok{str}\NormalTok{(}\KeywordTok{parse_date}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"2010-01-01"}\NormalTok{, }\StringTok{"1979-10-14"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Date[1:2], format: "2010-01-01" "1979-10-14"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# set specific values to NA}
+
+\KeywordTok{parse_integer}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"1"}\NormalTok{, }\StringTok{"231"}\NormalTok{, }\StringTok{"."}\NormalTok{, }\StringTok{"456"}\NormalTok{), }\DataTypeTok{na =} \StringTok{"."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]   1 231  NA 456
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# parsing fail}
+
+\NormalTok{x <-}\StringTok{ }\KeywordTok{parse_integer}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"123"}\NormalTok{, }\StringTok{"345"}\NormalTok{, }\StringTok{"abc"}\NormalTok{, }\StringTok{"123.45"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in rbind(names(probs), probs_f): number of columns of result is not
+## a multiple of vector length (arg 1)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: 2 parsing failures.
+## row # A tibble: 2 x 4 col     row   col expected               actual expected   <int> <int> <chr>                  <chr>  actual 1     3    NA an integer             abc    row 2     4    NA no trailing characters .45
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 123 345  NA  NA
+## attr(,"problems")
+## # A tibble: 2 x 4
+##     row   col expected               actual
+##   <int> <int> <chr>                  <chr> 
+## 1     3    NA an integer             abc   
+## 2     4    NA no trailing characters .45
+\end{verbatim}
+
+\begin{verbatim}
+parse_logical and parse_integer - self explanatory
+
+parse_double - strict numerical parser
+parse_number - flexible numerical parser
+
+parse_character - may be difficult due to character encodings
+
+parse_factor - creates factors, which R uses to represent categorical variables with fixed and known values
+
+parse_datetime, parse_date, parse_time - lots of different ways to write dates leads to complicated functions
+\end{verbatim}
+
+\subsubsection{Numbers}\label{numbers}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_double}\NormalTok{(}\StringTok{"1.23"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.23
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# locale allows parse to adjust for localized methods of date / numbers / etc}
+\KeywordTok{parse_double}\NormalTok{(}\StringTok{"1,23"}\NormalTok{, }\DataTypeTok{locale =} \KeywordTok{locale}\NormalTok{(}\DataTypeTok{decimal_mark =} \StringTok{","}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.23
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# parse_number ignores non numeric characters before and after the number}
+
+\KeywordTok{parse_number}\NormalTok{(}\StringTok{"$1000"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_number}\NormalTok{(}\StringTok{"20%"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 20
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_number}\NormalTok{(}\StringTok{"It costs $123.45"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 123.45
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# used in america}
+\KeywordTok{parse_number}\NormalTok{(}\StringTok{"$123,456,789"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 123456789
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# used in many parts of europe}
+\KeywordTok{parse_number}\NormalTok{(}\StringTok{"123.456.789"}\NormalTok{, }\DataTypeTok{locale =} \KeywordTok{locale}\NormalTok{(}\DataTypeTok{grouping_mark =} \StringTok{"."}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 123456789
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# used in switzerland}
+\KeywordTok{parse_number}\NormalTok{(}\StringTok{"123`456`789"}\NormalTok{, }\DataTypeTok{locale =} \KeywordTok{locale}\NormalTok{(}\DataTypeTok{grouping_mark =} \StringTok{"`"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 123456789
+\end{verbatim}
+
+\subsubsection{Strings}\label{strings}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Show UTF-8 representation of English characters}
+
+\KeywordTok{charToRaw}\NormalTok{(}\StringTok{"Michael"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4d 69 63 68 61 65 6c
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# example of UTF-8}
+
+\NormalTok{x1 <-}\StringTok{ "El Ni}\CharTok{\textbackslash{}xf1}\StringTok{o was particularly bad this year"}
+\NormalTok{x2 <-}\StringTok{ "}\CharTok{\textbackslash{}x82\textbackslash{}xb1\textbackslash{}x82\textbackslash{}xf1\textbackslash{}x82\textbackslash{}xc9\textbackslash{}x82\textbackslash{}xbf\textbackslash{}x82\textbackslash{}xcd}\StringTok{"}
+
+\KeywordTok{parse_character}\NormalTok{(x1, }\DataTypeTok{locale =} \KeywordTok{locale}\NormalTok{(}\DataTypeTok{encoding =} \StringTok{"Latin1"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "El Niño was particularly bad this year"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_character}\NormalTok{(x2, }\DataTypeTok{locale =} \KeywordTok{locale}\NormalTok{(}\DataTypeTok{encoding =} \StringTok{"Shift-JIS"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "こんにちは"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# If the encoding is not UTF-8 and it is not provided in the documentation}
+
+\KeywordTok{guess_encoding}\NormalTok{(}\KeywordTok{charToRaw}\NormalTok{(x1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 2
+##   encoding   confidence
+##   <chr>           <dbl>
+## 1 ISO-8859-1       0.46
+## 2 ISO-8859-9       0.23
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{guess_encoding}\NormalTok{(}\KeywordTok{charToRaw}\NormalTok{(x2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 2
+##   encoding confidence
+##   <chr>         <dbl>
+## 1 KOI8-R         0.42
+\end{verbatim}
+
+\subsubsection{Factors}\label{factors}
+
+R uses factors to represent categorical variables that have a known set
+of possible values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# give parse_factor a vector of known levels to generatea warning whenever an unexpected value is present }
+
+\NormalTok{fruit <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"apple"}\NormalTok{, }\StringTok{"banana"}\NormalTok{)}
+\KeywordTok{parse_factor}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"apple"}\NormalTok{, }\StringTok{"banana"}\NormalTok{, }\StringTok{"bananana"}\NormalTok{), }\DataTypeTok{levels =}\NormalTok{ fruit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: 1 parsing failure.
+## row # A tibble: 1 x 4 col     row   col expected           actual   expected   <int> <int> <chr>              <chr>    actual 1     3    NA value in level set bananana
+\end{verbatim}
+
+\begin{verbatim}
+## [1] apple  banana <NA>  
+## attr(,"problems")
+## # A tibble: 1 x 4
+##     row   col expected           actual  
+##   <int> <int> <chr>              <chr>   
+## 1     3    NA value in level set bananana
+## Levels: apple banana
+\end{verbatim}
+
+\subsubsection{Dates, Date-Times, and
+Times}\label{dates-date-times-and-times}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# parse_datetime() expects an ISO8601 date-time. year -> month -> day -> hour -> minute -> second}
+
+\KeywordTok{parse_datetime}\NormalTok{(}\StringTok{"2010-10-01T2010"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2010-10-01 20:10:00 UTC"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# if time is omitted, it will be set to midnight }
+
+\KeywordTok{parse_datetime}\NormalTok{(}\StringTok{"2010-10-01"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2010-10-01 UTC"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# parse_date() expects a four digit year, a - or /, the month, a - or /, then the day}
+
+\KeywordTok{parse_date}\NormalTok{(}\StringTok{"2010-10-01"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2010-10-01"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# parse_time() expects the hour, :, minutes, optionally : and seconds and an optional a.m., p.m. specifier}
+
+\KeywordTok{parse_time}\NormalTok{(}\StringTok{"01:10 am"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 01:10:00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_time}\NormalTok{(}\StringTok{"20:10:01"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 20:10:01
+\end{verbatim}
+
+\subsubsection{Building a date-time
+format}\label{building-a-date-time-format}
+
+\begin{verbatim}
+
+Year
+  %Y - 4 digits
+  %y - 2 digits
+
+Month
+  %m - 2 digits
+  %b - abbreviated name, like jan
+  %B - full name, like January
+
+Day
+  %d - 2 digits
+  %e - optional leading space
+  
+Time
+  %H - 0-23 format
+  %I - 0-12, must be used with %p
+  %p - am, pm indicator
+  %M - minutes
+  %S - integer seconds
+  %OS - real seconds
+  %Z - time zone 
+  %z as offset from UTC, e.g. +0800
+  
+Non-digits
+  %. - skips one nondigit character
+  %* - skips any number of nondigits
+  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# example of above}
+
+\KeywordTok{parse_date}\NormalTok{(}\StringTok{"01/02/15"}\NormalTok{, }\StringTok{"%m/%d/%y"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2015-01-02"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_date}\NormalTok{(}\StringTok{"01/02/15"}\NormalTok{, }\StringTok{"%d/%m/%y"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2015-02-01"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_date}\NormalTok{(}\StringTok{"01/02/15"}\NormalTok{, }\StringTok{"%y/%m/%d"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2001-02-15"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_date}\NormalTok{(}\StringTok{"1 janvier 2015"}\NormalTok{, }\StringTok{"%d %B %Y"}\NormalTok{, }\DataTypeTok{locale =} \KeywordTok{locale}\NormalTok{(}\StringTok{"fr"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2015-01-01"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# What are the important arguments to locale? }
+
+\CommentTok{# date and time formats, date_names, date_format, time_format}
+\CommentTok{# time_zone}
+\CommentTok{# numbers : decimal_mark, grouping_mark}
+\CommentTok{# encoding }
+
+\CommentTok{# What happens if you try to set decimal_mark and grouping_mark to the same character?}
+
+\CommentTok{#locale(decimal_mark = ".", grouping_mark = ".")}
+
+\CommentTok{# What happens to the default value of grouping_mark when you set decimal_mark to ","? }
+
+\CommentTok{# the grouping_mark is set to . }
+
+\KeywordTok{locale}\NormalTok{(}\DataTypeTok{decimal_mark =} \StringTok{","}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## <locale>
+## Numbers:  123.456,78
+## Formats:  %AD / %AT
+## Timezone: UTC
+## Encoding: UTF-8
+## <date_names>
+## Days:   Sunday (Sun), Monday (Mon), Tuesday (Tue), Wednesday (Wed),
+##         Thursday (Thu), Friday (Fri), Saturday (Sat)
+## Months: January (Jan), February (Feb), March (Mar), April (Apr), May
+##         (May), June (Jun), July (Jul), August (Aug), September
+##         (Sep), October (Oct), November (Nov), December (Dec)
+## AM/PM:  AM/PM
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# What happens to the default value of decimal_mark when you set the grouping_mark to "."}
+
+\CommentTok{# it is set to , }
+
+\KeywordTok{locale}\NormalTok{(}\DataTypeTok{grouping_mark =} \StringTok{"."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## <locale>
+## Numbers:  123.456,78
+## Formats:  %AD / %AT
+## Timezone: UTC
+## Encoding: UTF-8
+## <date_names>
+## Days:   Sunday (Sun), Monday (Mon), Tuesday (Tue), Wednesday (Wed),
+##         Thursday (Thu), Friday (Fri), Saturday (Sat)
+## Months: January (Jan), February (Feb), March (Mar), April (Apr), May
+##         (May), June (Jun), July (Jul), August (Aug), September
+##         (Sep), October (Oct), November (Nov), December (Dec)
+## AM/PM:  AM/PM
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# the date_format and time_format options to locale set date and time formats}
+
+\KeywordTok{locale}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## <locale>
+## Numbers:  123,456.78
+## Formats:  %AD / %AT
+## Timezone: UTC
+## Encoding: UTF-8
+## <date_names>
+## Days:   Sunday (Sun), Monday (Mon), Tuesday (Tue), Wednesday (Wed),
+##         Thursday (Thu), Friday (Fri), Saturday (Sat)
+## Months: January (Jan), February (Feb), March (Mar), April (Apr), May
+##         (May), June (Jun), July (Jul), August (Aug), September
+##         (Sep), October (Oct), November (Nov), December (Dec)
+## AM/PM:  AM/PM
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# examples parsing french dates}
+
+\KeywordTok{parse_date}\NormalTok{(}\StringTok{"1 janvier 2015"}\NormalTok{, }\StringTok{"%d %B %Y"}\NormalTok{, }\DataTypeTok{locale =} \KeywordTok{locale}\NormalTok{(}\StringTok{"fr"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2015-01-01"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_date}\NormalTok{(}\StringTok{"14 oct. 1979"}\NormalTok{, }\StringTok{"%d %b %Y"}\NormalTok{, }\DataTypeTok{locale =} \KeywordTok{locale}\NormalTok{(}\StringTok{"fr"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "1979-10-14"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Whats the difference between read_csv and read_csv2? }
+
+\CommentTok{# read_csv2 uses ; as a delimiter rather than ,. They are both special cases of read_delim}
+
+\CommentTok{# more practice creating formats}
+
+\NormalTok{d1 <-}\StringTok{ "January 1, 2010"}
+\NormalTok{d2 <-}\StringTok{ "2015-Mar-07"}
+\NormalTok{d3 <-}\StringTok{ "06-Jun-2017"}
+\NormalTok{d4 <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"August 19 (2015)"}\NormalTok{, }\StringTok{"July 1 (2015)"}\NormalTok{)}
+\NormalTok{d5 <-}\StringTok{ "12/30/14"} \CommentTok{#Dec 30, 2014}
+\NormalTok{t1 <-}\StringTok{ "1705"}
+\NormalTok{t2 <-}\StringTok{ "11:15:10.12 pm"}
+
+\KeywordTok{parse_date}\NormalTok{(d1, }\StringTok{"%B %d, %Y"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2010-01-01"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_date}\NormalTok{(d2, }\StringTok{"%Y-%b-%d"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2015-03-07"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_date}\NormalTok{(d3, }\StringTok{"%d-%b-%Y"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2017-06-06"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_date}\NormalTok{(d4, }\StringTok{"%B %d (%Y)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2015-08-19" "2015-07-01"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_date}\NormalTok{(d5, }\StringTok{"%m/%d/%y"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2014-12-30"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_time}\NormalTok{(t1, }\StringTok{"%H%M"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 17:05:00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{parse_time}\NormalTok{(t2, }\StringTok{"%H:%M:%OS %p"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 23:15:10.12
+\end{verbatim}
+
+\subsubsection{Parsing a File}\label{parsing-a-file}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# readr uses guess_parser and parse_guess() to guess what type of vector its reading }
+\KeywordTok{guess_parser}\NormalTok{(}\StringTok{"2010-10-01"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "date"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{guess_parser}\NormalTok{(}\StringTok{"15:01"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "time"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{guess_parser}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"1"}\NormalTok{, }\StringTok{"5"}\NormalTok{, }\StringTok{"9"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "integer"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{guess_parser}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"12,352,561"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "number"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(}\KeywordTok{parse_guess}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"2010-10-10"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Date[1:1], format: "2010-10-10"
+\end{verbatim}
+
+\paragraph{Problems}\label{problems}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{challenge <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}\KeywordTok{readr_example}\NormalTok{(}\StringTok{"challenge.csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Parsed with column specification:
+## cols(
+##   x = col_integer(),
+##   y = col_character()
+## )
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in rbind(names(probs), probs_f): number of columns of result is not
+## a multiple of vector length (arg 1)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: 1000 parsing failures.
+## row # A tibble: 5 x 5 col     row col   expected               actual             file               expected   <int> <chr> <chr>                  <chr>              <chr>              actual 1  1001 x     no trailing characters .23837975086644292 '/home/michael/R/~ file 2  1002 x     no trailing characters .41167997173033655 '/home/michael/R/~ row 3  1003 x     no trailing characters .7460716762579978  '/home/michael/R/~ col 4  1004 x     no trailing characters .723450553836301   '/home/michael/R/~ expected 5  1005 x     no trailing characters .614524137461558   '/home/michael/R/~
+## ... ................. ... .......................................................................... ........ .......................................................................... ...... .......................................................................... .... .......................................................................... ... .......................................................................... ... .......................................................................... ........ ..........................................................................
+## See problems(...) for more details.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{problems}\NormalTok{(challenge)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1,000 x 5
+##      row col   expected               actual             file             
+##    <int> <chr> <chr>                  <chr>              <chr>            
+##  1  1001 x     no trailing characters .23837975086644292 '/home/michael/R~
+##  2  1002 x     no trailing characters .41167997173033655 '/home/michael/R~
+##  3  1003 x     no trailing characters .7460716762579978  '/home/michael/R~
+##  4  1004 x     no trailing characters .723450553836301   '/home/michael/R~
+##  5  1005 x     no trailing characters .614524137461558   '/home/michael/R~
+##  6  1006 x     no trailing characters .473980569280684   '/home/michael/R~
+##  7  1007 x     no trailing characters .5784610391128808  '/home/michael/R~
+##  8  1008 x     no trailing characters .2415937229525298  '/home/michael/R~
+##  9  1009 x     no trailing characters .11437866208143532 '/home/michael/R~
+## 10  1010 x     no trailing characters .2983446326106787  '/home/michael/R~
+## # ... with 990 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# The integers after row 1000 are all actually doubles! Lets fix that}
+
+\CommentTok{# copy and paste the column specification into the original call}
+\NormalTok{challenge <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}
+  \KeywordTok{readr_example}\NormalTok{(}\StringTok{"challenge.csv"}\NormalTok{), }
+  \DataTypeTok{col_types =} \KeywordTok{cols}\NormalTok{(}
+    \DataTypeTok{x =} \KeywordTok{col_integer}\NormalTok{(),}
+    \DataTypeTok{y =} \KeywordTok{col_character}\NormalTok{()}
+\NormalTok{  )}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in rbind(names(probs), probs_f): number of columns of result is not a multiple of vector length (arg 1)
+
+## Warning in rbind(names(probs), probs_f): 1000 parsing failures.
+## row # A tibble: 5 x 5 col     row col   expected               actual             file               expected   <int> <chr> <chr>                  <chr>              <chr>              actual 1  1001 x     no trailing characters .23837975086644292 '/home/michael/R/~ file 2  1002 x     no trailing characters .41167997173033655 '/home/michael/R/~ row 3  1003 x     no trailing characters .7460716762579978  '/home/michael/R/~ col 4  1004 x     no trailing characters .723450553836301   '/home/michael/R/~ expected 5  1005 x     no trailing characters .614524137461558   '/home/michael/R/~
+## ... ................. ... .......................................................................... ........ .......................................................................... ...... .......................................................................... .... .......................................................................... ... .......................................................................... ... .......................................................................... ........ ..........................................................................
+## See problems(...) for more details.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# tweak the type of the x column}
+
+\NormalTok{challenge <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}
+  \KeywordTok{readr_example}\NormalTok{(}\StringTok{"challenge.csv"}\NormalTok{),}
+  \DataTypeTok{col_types =} \KeywordTok{cols}\NormalTok{(}
+    \DataTypeTok{x =} \KeywordTok{col_double}\NormalTok{(),}
+    \DataTypeTok{y =} \KeywordTok{col_character}\NormalTok{()}
+\NormalTok{  )}
+\NormalTok{)}
+
+\CommentTok{# the first problem is fixed, but the last few y rows have dates stored as character vectors}
+
+\KeywordTok{tail}\NormalTok{(challenge)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 2
+##       x y         
+##   <dbl> <chr>     
+## 1 0.805 2019-11-21
+## 2 0.164 2018-03-29
+## 3 0.472 2014-08-04
+## 4 0.718 2015-08-16
+## 5 0.270 2020-02-04
+## 6 0.608 2019-01-06
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# specify y as a date column}
+
+\NormalTok{challenge <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}
+  \KeywordTok{readr_example}\NormalTok{(}\StringTok{"challenge.csv"}\NormalTok{), }
+  \DataTypeTok{col_types =} \KeywordTok{cols}\NormalTok{(}
+    \DataTypeTok{x =} \KeywordTok{col_double}\NormalTok{(),}
+    \DataTypeTok{y =} \KeywordTok{col_date}\NormalTok{()}
+\NormalTok{  )}
+\NormalTok{)}
+
+\KeywordTok{tail}\NormalTok{(challenge)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 2
+##       x y         
+##   <dbl> <date>    
+## 1 0.805 2019-11-21
+## 2 0.164 2018-03-29
+## 3 0.472 2014-08-04
+## 4 0.718 2015-08-16
+## 5 0.270 2020-02-04
+## 6 0.608 2019-01-06
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# always supply col_type when using readr}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Other Strategies}\label{other-strategies}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# if we guess just the first 1000 rows, it gives us integer and character}
+
+\NormalTok{challenge2 <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}
+  \KeywordTok{readr_example}\NormalTok{(}\StringTok{"challenge.csv"}\NormalTok{), }
+  \DataTypeTok{guess_max =} \DecValTok{1000}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Parsed with column specification:
+## cols(
+##   x = col_integer(),
+##   y = col_character()
+## )
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in rbind(names(probs), probs_f): number of columns of result is not
+## a multiple of vector length (arg 1)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: 1000 parsing failures.
+## row # A tibble: 5 x 5 col     row col   expected               actual             file               expected   <int> <chr> <chr>                  <chr>              <chr>              actual 1  1001 x     no trailing characters .23837975086644292 '/home/michael/R/~ file 2  1002 x     no trailing characters .41167997173033655 '/home/michael/R/~ row 3  1003 x     no trailing characters .7460716762579978  '/home/michael/R/~ col 4  1004 x     no trailing characters .723450553836301   '/home/michael/R/~ expected 5  1005 x     no trailing characters .614524137461558   '/home/michael/R/~
+## ... ................. ... .......................................................................... ........ .......................................................................... ...... .......................................................................... .... .......................................................................... ... .......................................................................... ... .......................................................................... ........ ..........................................................................
+## See problems(...) for more details.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# but if we guess 1001 it guesses double and date correctly }
+\NormalTok{challenge2 <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}
+  \KeywordTok{readr_example}\NormalTok{(}\StringTok{"challenge.csv"}\NormalTok{), }
+  \DataTypeTok{guess_max =} \DecValTok{1001}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Parsed with column specification:
+## cols(
+##   x = col_double(),
+##   y = col_date(format = "")
+## )
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# sometimes its easier to diagnose problems if you read in all the columns as character vectors}
+
+\NormalTok{challenge2 <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}
+  \KeywordTok{readr_example}\NormalTok{(}\StringTok{"challenge.csv"}\NormalTok{), }
+  \DataTypeTok{col_types =} \KeywordTok{cols}\NormalTok{(}
+    \DataTypeTok{.default =} \KeywordTok{col_character}\NormalTok{()}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{df <-}\StringTok{ }\KeywordTok{tribble}\NormalTok{(}
+  \OperatorTok{~}\NormalTok{x, }\OperatorTok{~}\NormalTok{y, }
+  \StringTok{"1"}\NormalTok{, }\StringTok{"1.21"}\NormalTok{,}
+  \StringTok{"2"}\NormalTok{, }\StringTok{"2.32"}\NormalTok{, }
+  \StringTok{"3"}\NormalTok{, }\StringTok{"4.56"}
+\NormalTok{)}
+
+\CommentTok{# df is chr vectors}
+
+\NormalTok{df}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 3 x 2
+##   x     y    
+##   <chr> <chr>
+## 1 1     1.21 
+## 2 2     2.32 
+## 3 3     4.56
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# now df is parsed and has its column vectors changed}
+
+\KeywordTok{type_convert}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Parsed with column specification:
+## cols(
+##   x = col_integer(),
+##   y = col_double()
+## )
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 3 x 2
+##       x     y
+##   <int> <dbl>
+## 1     1  1.21
+## 2     2  2.32
+## 3     3  4.56
+\end{verbatim}
+
+\subsubsection{Writing to a File}\label{writing-to-a-file}
+
+\begin{verbatim}
+readr has two functions to writing data back to disk: 
+write_csv() and write_tsv()
+
+They:
+  * Always encode in UTF-8
+  * Save dates and date-times in ISO8601 format so they are easily parsable
+  
+If you want to write to excel, use write_excel_csv()
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{write_csv}\NormalTok{(challenge, }\StringTok{"challenge.csv"}\NormalTok{)}
+
+\KeywordTok{write_csv}\NormalTok{(challenge, }\StringTok{"challenge-2.csv"}\NormalTok{)}
+\KeywordTok{read_csv}\NormalTok{(}\StringTok{"challenge-2.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Parsed with column specification:
+## cols(
+##   x = col_integer(),
+##   y = col_character()
+## )
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in rbind(names(probs), probs_f): number of columns of result is not
+## a multiple of vector length (arg 1)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: 1000 parsing failures.
+## row # A tibble: 5 x 5 col     row col   expected               actual             file              expected   <int> <chr> <chr>                  <chr>              <chr>             actual 1  1001 x     no trailing characters .23837975086644292 'challenge-2.csv' file 2  1002 x     no trailing characters .41167997173033655 'challenge-2.csv' row 3  1003 x     no trailing characters .7460716762579978  'challenge-2.csv' col 4  1004 x     no trailing characters .723450553836301   'challenge-2.csv' expected 5  1005 x     no trailing characters .614524137461558   'challenge-2.csv'
+## ... ................. ... ......................................................................... ........ ......................................................................... ...... ......................................................................... .... ......................................................................... ... ......................................................................... ... ......................................................................... ........ .........................................................................
+## See problems(...) for more details.
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 2,000 x 2
+##        x y    
+##    <int> <chr>
+##  1   404 <NA> 
+##  2  4172 <NA> 
+##  3  3004 <NA> 
+##  4   787 <NA> 
+##  5    37 <NA> 
+##  6  2332 <NA> 
+##  7  2489 <NA> 
+##  8  1449 <NA> 
+##  9  3665 <NA> 
+## 10  3863 <NA> 
+## # ... with 1,990 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# type information is lost when you save to CSV. As a result, you need to recreate the column specification each time you read it in}
+
+\CommentTok{# an alternative is write_rds and read_rds, which store data in R's custom binary format}
+\KeywordTok{write_rds}\NormalTok{(challenge, }\StringTok{"challenge.rds"}\NormalTok{)}
+\KeywordTok{read_rds}\NormalTok{(}\StringTok{"challenge.rds"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2,000 x 2
+##        x y         
+##    <dbl> <date>    
+##  1   404 NA        
+##  2  4172 NA        
+##  3  3004 NA        
+##  4   787 NA        
+##  5    37 NA        
+##  6  2332 NA        
+##  7  2489 NA        
+##  8  1449 NA        
+##  9  3665 NA        
+## 10  3863 NA        
+## # ... with 1,990 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# feather implements a fast binary file format that can be shared across programming language. Feather is faster than RDS, is usable outside R. The only difference is that RDS supports list-columns, which feather does not }
+
+\KeywordTok{write_feather}\NormalTok{(challenge, }\StringTok{"challenge.feather"}\NormalTok{)}
+\KeywordTok{read_feather}\NormalTok{(}\StringTok{"challenge.feather"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2,000 x 2
+##        x y         
+##    <dbl> <date>    
+##  1   404 NA        
+##  2  4172 NA        
+##  3  3004 NA        
+##  4   787 NA        
+##  5    37 NA        
+##  6  2332 NA        
+##  7  2489 NA        
+##  8  1449 NA        
+##  9  3665 NA        
+## 10  3863 NA        
+## # ... with 1,990 more rows
+\end{verbatim}
+
+\begin{verbatim}
+For other types of data: 
+
+haven reads SPSS, stata, and SAS files
+
+readxl reads excel files, both .xls and .xlsx
+
+DBI along with a database specific backend like (RMySQL, RSQLite, RPostgreSQL) allows running of sql queries against a database and returns a data frame
+
+For hierarchical data, use jsonlite for JSON and xml2 for XML 
+\end{verbatim}
+
+
+\end{document}

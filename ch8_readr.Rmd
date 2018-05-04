@@ -285,7 +285,7 @@ parse_date("1 janvier 2015", "%d %B %Y", locale = locale("fr"))
 
 # What happens if you try to set decimal_mark and grouping_mark to the same character?
 
-locale(decimal_mark = ".", grouping_mark = ".")
+#locale(decimal_mark = ".", grouping_mark = ".")
 
 # What happens to the default value of grouping_mark when you set decimal_mark to ","? 
 
